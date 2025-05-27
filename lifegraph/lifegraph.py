@@ -1,18 +1,15 @@
-from datetime import date
 from dateutil.relativedelta import relativedelta
 from enum import Enum
 from matplotlib import colors as mcolors
 from matplotlib.transforms import Bbox
 import datetime
-import gc
 import matplotlib.image as mpimg
 import matplotlib.lines as mlines
-import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 
-from .configuration import LifegraphParams, Papersize
+from lifegraph.configuration import LifegraphParams, Papersize
 
 exclude = []
 colors = [(key, val)
@@ -626,7 +623,7 @@ class Lifegraph:
         color = self.settings.rcParams["axes.labelcolor"] if self.settings.otherParams[
             "xlabel.color"] is None else self.settings.otherParams["xlabel.color"]
         self.ax.set_xticks(xticks)
-        self.ax.set_xticklabels(xticks[:-1])
+        self.ax.set_xticklabels(xticks)
         self.ax.set_xlabel(self.xaxis_label, fontsize=fs, color=color)
         self.ax.xaxis.set_label_coords(
             *self.settings.otherParams["xlabel.position"])
