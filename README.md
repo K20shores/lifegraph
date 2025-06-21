@@ -11,19 +11,11 @@
 [grid_customization]: examples/images/grid_customization.png "Customize the grid"
 [annotation_placement]: examples/images/placement.png "Annotation placement"
 
-# Table of Contents
-1. [Life Graph Inspriation](#life-graph-inspiration)
-1. [A Life Graph Example](#a-life-graph-example)
-1. [A Simple Grid](#a-simple-grid)
-1. [Add a Title](#add-a-title)
-1. [Add a Watermark](#add-a-watermark)
-1. [Display and Change the Max Age](#display-and-change-the-max-age)
-1. [Adding a Life event](#adding-a-life-event)
-1. [Adding an Era](#adding-an-era)
-1. [Adding an Era Span](#adding-an-era-span)
-1. [Add an Image](#add-an-image)
-1. [Customize the Grid](#customize-the-grid)
-1. [Annotation Placement](#annotation-placement)
+# Life Graph
+[![License](https://img.shields.io/github/license/k20shores/lifegraph.svg)](https://github.com/k20shores/lifegraph/blob/main/LICENSE)
+[![CI Status](https://github.com/k20shores/lifegraph/actions/workflows/CI_Tests.yml/badge.svg)](https://github.com/k20shores/lifegraph/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/github/k20shores/lifegraph/graph/badge.svg?token=OR7JEQJSRQ)](https://codecov.io/github/k20shores/lifegraph)
+[![PyPI version](https://badge.fury.io/py/acom-lifegraph.svg)](https://badge.fury.io/py/acom-lifegraph)
 
 # Life Graph Inspiration
 Inspired by [this post](https://waitbutwhy.com/2014/05/life-weeks.html), I decided I wanted to make my own graph of my life.
