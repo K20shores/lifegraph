@@ -1,7 +1,7 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
 from datetime import date, datetime
 
-def main():
+def main(path=None):
     birthday = date(1995, 11, 20)
     g = Lifegraph(birthday, dpi=300, size=Papersize.Letter, label_space_epsilon=1)
 
@@ -26,6 +26,11 @@ def main():
 
     g.show_max_age_label()
 
-    g.save("images/alife.png")
+    if path:
+        g.save(f"{path}/alife.png")
 
-main()
+if __name__ == "__main__":
+    main("images")
+
+def test_alife(tmp_path):
+    main(tmp_path)
