@@ -1135,5 +1135,6 @@ class LifegraphParams:
             raise ValueError("Unknown paper size")
 
         self.settings = d
+        self.size = papersize
         self.rcParams = d["rcParams"]
         self.otherParams = d["otherParams"]
