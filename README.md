@@ -14,7 +14,7 @@
 # Life Graph
 [![License](https://img.shields.io/github/license/k20shores/lifegraph.svg)](https://github.com/k20shores/lifegraph/blob/main/LICENSE)
 [![Tests](https://github.com/k20shores/lifegraph/actions/workflows/test.yml/badge.svg)](https://github.com/k20shores/lifegraph/actions/workflows/test.yml)
-[![codecov](https://codecov.io/github/k20shores/lifegraph/graph/badge.svg?token=OR7JEQJSRQ)](https://codecov.io/github/k20shores/lifegraph)
+[![codecov](https://codecov.io/github/k20shores/lifegraph/graph/badge.svg?token=H171ALNX97)](https://codecov.io/github/k20shores/lifegraph)
 [![PyPI version](https://badge.fury.io/py/lifegraph.svg)](https://badge.fury.io/py/lifegraph)
 
 # Life Graph Inspiration
