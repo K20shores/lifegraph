@@ -26,5 +26,6 @@ Homepage = "https://github.com/kyleshores/Life-Graph"
 [project.optional-dependencies]
 
 dev = [
-    "pytest"
+    "pytest",
+    "pytest-cov"
 ]

@@ -1,7 +1,7 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, Side
 from datetime import date
 
-if __name__ == '__main__':
+def main(path=None):
     birthday = date(1990, 11, 1)
     g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
 
@@ -26,4 +26,13 @@ if __name__ == '__main__':
     # a side
     g.add_era_span('Blue thing', start_date=date(2014, 2, 1), end_date=date(2015, 8, 1), color='b', side=Side.LEFT)
 
-    g.save("images/placement.png")
+    if path:
+        g.save(f"{path}/placement.png")
+    else:
+        g.save("images/placement.png")
+
+if __name__ == '__main__':
+    main()
+
+def test_placement(tmp_path):
+    main(tmp_path)

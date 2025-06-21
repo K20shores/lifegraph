@@ -1,7 +1,7 @@
 from lifegraph.lifegraph import Lifegraph, Papersize
 from datetime import date
 
-if __name__ == '__main__':
+def main(path=None):
     birthday = date(1990, 11, 1)
     g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
 
@@ -14,4 +14,13 @@ if __name__ == '__main__':
     # you can also choose the color
     g.add_era_span('Running for city\ncouncil', date(2019, 12, 10), date(2020, 11, 5), color="#4423fe")
 
-    g.save("images/grid_era_span.png")
+    if path:
+        g.save(f"{path}/grid_era_span.png")
+    else:
+        g.save("images/grid_era_span.png")
+
+if __name__ == '__main__':
+    main()
+
+def test_grid_era_span(tmp_path):
+    main(tmp_path)
