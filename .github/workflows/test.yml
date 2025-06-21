@@ -33,12 +33,12 @@ jobs:
         run: pip install -e '.[dev]'
 
       - name: Run tests and generate coverage reports
-        # if: runner.os != 'Windows'
+        if: runner.os != 'Windows'
         run: pytest --cov lifegraph --cov-report=xml --cov-report=term
 
-      # - name: Run tests (Windows, skip examples)
-      #   if: runner.os == 'Windows'
-      #   run: pytest --cov lifegraph --cov-report=xml --cov-report=term tests/
+      - name: Run tests (Windows, skip examples)
+        if: runner.os == 'Windows'
+        run: pytest --cov lifegraph --cov-report=xml --cov-report=term tests/
 
       - name: Upload merged coverage to Codecov
         if: runner.os == 'Linux' && matrix.python-version == '3.13'
