@@ -29,7 +29,7 @@ def main(path=None):
     if path:
         g.save(f"{path}/alife.png")
     else:
-        g.save(f"images/lifegraph_{sz.name}.png")
+        g.save(f"images/alife.png")
 
 if __name__ == "__main__":
     main("images")
