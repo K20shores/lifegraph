@@ -1,8 +1,10 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
 from datetime import date, datetime, timedelta
+import os
 
-if __name__ == '__main__':
+def main(path=None):
     birthday = date(1990, 11, 1)
+    image_path = os.path.join(os.path.dirname(__file__), "couple.jpg")
 
     for sz in Papersize:
         print(f"{sz}")
@@ -23,9 +25,18 @@ if __name__ == '__main__':
 
         g.add_title("Our Life, Together")
 
-        g.add_image("couple.jpg", alpha=0.3)
+        g.add_image(image_path, alpha=0.3)
 
         g.show_max_age_label()
 
-        g.save(f"images/lifegraph_{sz.name}.png")
+        if path:
+            g.save(f"{path}/lifegraph_{sz.name}.png")
+        else:
+            g.save(f"images/lifegraph_{sz.name}.png")
         g.close()
+
+if __name__ == '__main__':
+    main()
+
+def test_all_sizes(tmp_path):
+    main(tmp_path)

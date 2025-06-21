@@ -1,7 +1,7 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, Side
 from datetime import date
 
-if __name__ == '__main__':
+def main(path=None):
     birthday = date(1990, 11, 1)
     g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
 
@@ -18,4 +18,13 @@ if __name__ == '__main__':
     # or RGB
     g.add_life_event('First car purchased', date(2010, 7, 14), color = (1, 0, 0))
 
-    g.save("images/grid_life_event.png")
+    if path:
+        g.save(f"{path}/grid_life_event.png")
+    else:
+        g.save("images/grid_life_event.png")
+
+if __name__ == '__main__':
+    main()
+
+def test_grid_life_event(tmp_path):
+    main(tmp_path)
