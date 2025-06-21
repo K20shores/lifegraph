@@ -40,12 +40,12 @@ jobs:
         if: runner.os == 'Windows'
         run: pytest --cov lifegraph --cov-report=xml --cov-report=term tests/
 
-      - name: Upload coverage artifact
+      - name: Upload coverage data file
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.python-version }}.xml
-          path: coverage.xml
+          name: coverage-${{ matrix.python-version }}
+          path: .coverage
 
   codecov-upload:
     needs: test
@@ -55,13 +55,13 @@ jobs:
       - name: Download all coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: coverage-*.xml
+          pattern: coverage-*
           merge-multiple: true
           path: coverage-files
       - name: Combine coverage reports
         run: |
           pip install coverage
-          coverage combine coverage-files/*.xml
+          coverage combine coverage-files
           coverage xml -o merged-coverage.xml
       - name: Upload merged coverage to Codecov
         uses: codecov/codecov-action@v5
