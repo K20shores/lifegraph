@@ -15,7 +15,7 @@
 [![License](https://img.shields.io/github/license/k20shores/lifegraph.svg)](https://github.com/k20shores/lifegraph/blob/main/LICENSE)
 [![Tests](https://github.com/k20shores/lifegraph/actions/workflows/test.yml/badge.svg)](https://github.com/k20shores/lifegraph/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/k20shores/lifegraph/graph/badge.svg?token=OR7JEQJSRQ)](https://codecov.io/github/k20shores/lifegraph)
-[![PyPI version](https://badge.fury.io/py/acom-lifegraph.svg)](https://badge.fury.io/py/acom-lifegraph)
+[![PyPI version](https://badge.fury.io/py/lifegraph.svg)](https://badge.fury.io/py/lifegraph)
 
 # Life Graph Inspiration
 Inspired by [this post](https://waitbutwhy.com/2014/05/life-weeks.html), I decided I wanted to make my own graph of my life.
