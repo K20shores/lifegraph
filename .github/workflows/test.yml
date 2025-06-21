@@ -35,7 +35,7 @@ jobs:
       run: pip install -e '.[dev]'
     
     - name: Run tests and generate coverage reports
-      run: pytest --cov src/
+      run: pytest --cov lifegraph
     
     - name: Upload coverage reports to codecov
       if: runner.os == 'Linux'
