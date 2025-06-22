@@ -139,7 +139,7 @@ class Annotation(Point):
             return False
         return True
     def get_bbox_overlap(self, that, epsilon):
-        """Detmerine by how much the two annotation bounding boxes overlap
+        """Determine by how much the two annotation bounding boxes overlap
 
         :param that: an Annotation
         :param epsilon: A real number that will add a buffer space between the two label text bounding boxes
