@@ -24,7 +24,7 @@ class Point:
         return f"({self.x}, {self.y})"
 
 class DatePosition(Point):
-    """A class to hold the week, year of life, and date assocaited with a Point"""
+    """A class to hold the week, year of life, and date associated with a Point"""
     def __init__(self, x, y, date):
         """Initialize the DatePosition class. The base class is a Point
 
