@@ -10,5 +10,5 @@ for key, val in mcolors.CSS4_COLORS.items():
 
 def random_color():
     """Returns a random color defined in matplotlib.colors.BASE_COLORS or matplotlib.colors.CSS4_COLORS"""
-    c = colors[random.randint(0, len(colors) - 1)]
+    c = random.choice(colors)
     return c[1]
