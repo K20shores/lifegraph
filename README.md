@@ -17,6 +17,12 @@
 [![codecov](https://codecov.io/github/k20shores/lifegraph/graph/badge.svg?token=H171ALNX97)](https://codecov.io/github/k20shores/lifegraph)
 [![PyPI version](https://badge.fury.io/py/lifegraph.svg)](https://badge.fury.io/py/lifegraph)
 
+# Installation
+
+```
+pip install lifegraph
+```
+
 # Life Graph Inspiration
 Inspired by [this post](https://waitbutwhy.com/2014/05/life-weeks.html), I decided I wanted to make my own graph of my life.
 In the comments on that post, there are many other graphs available, but most of them add lots of different things that I did
