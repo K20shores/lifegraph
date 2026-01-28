@@ -14,7 +14,7 @@ from lifegraph.utils import random_color
 class Lifegraph:
     """This class will represent your life as a graph of boxes"""
 
-    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8]):
+    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8], ax=None):
         """Initalize the life graph
 
         :param birthdate: The date to start the graph from
@@ -23,12 +23,15 @@ class Lifegraph:
         :param label_space_epsilon: (Default value = .2) The minimum amount of space allowed between annotation text objects
         :param max_age: (Default value = 90) The ending age of the graph
         :param axes_rect: (Default value = [.25, .1, .5, .8]) The dimensions [left, bottom, width, height] of the axes instance passed to matplotlib.figure.Figure.add_axes
+        :param ax: (Default value = None) An optional matplotlib axes instance to draw on. If provided, lifegraph will draw on this axes instead of creating its own figure and axes. When using a provided axes, you are responsible for calling plt.show() or fig.savefig() yourself.
 
         """
         if birthdate is None or not isinstance(birthdate, datetime.date):
             raise ValueError("birthdate must be a valid datetime.date object")
 
         self.birthdate = birthdate
+        self.ax = ax  # Store the provided axes instance
+        self.owns_figure = (ax is None)  # Track whether we created the figure
 
         self.settings = LifegraphParams(size)
         self.settings.rcParams["figure.dpi"] = dpi
@@ -276,12 +279,14 @@ class Lifegraph:
     def show(self):
         """Show the grpah"""
         self.__draw()
-        plt.show()
+        if self.owns_figure:
+            plt.show()
 
     def close(self):
         """Close the graph"""
-        self.fig.clf()
-        plt.close()
+        if self.owns_figure and hasattr(self, 'fig'):
+            self.fig.clf()
+            plt.close()
 
     def save(self, name, transparent=False):
         """Save the graph.
@@ -291,7 +296,8 @@ class Lifegraph:
 
         """
         self.__draw()
-        plt.savefig(name, transparent=transparent)
+        if self.owns_figure:
+            plt.savefig(name, transparent=transparent)
     #endregion Public drawing methods
 
     #region Private drawing methods
@@ -299,8 +305,13 @@ class Lifegraph:
         """Internal, trigger drawing of the graph"""
         plt.rcParams.update(self.settings.rcParams)
 
-        self.fig = plt.figure()
-        self.ax = self.fig.add_axes(self.axes_rect)
+        # Use provided axes or create new figure and axes
+        if self.ax is None:
+            self.fig = plt.figure()
+            self.ax = self.fig.add_axes(self.axes_rect)
+        else:
+            # When using provided axes, get the figure from the axes
+            self.fig = self.ax.figure
 
         xs = np.arange(1, self.xmax+1)
         ys = [np.arange(0, self.ymax) for i in range(self.xmax)]

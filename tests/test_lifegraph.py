@@ -1,5 +1,6 @@
 import pytest
 import datetime
+import matplotlib.pyplot as plt
 from lifegraph.lifegraph import random_color, Point, DatePosition, Marker, Annotation, Era, EraSpan, Lifegraph, Side
 from lifegraph.configuration import Papersize
 
@@ -61,3 +62,105 @@ def test_lifegraph_init():
 def test_side_enum():
     assert Side.LEFT != Side.RIGHT
     assert str(Side.LEFT) != str(Side.RIGHT)
+
+def test_lifegraph_with_provided_axes():
+    """Test that Lifegraph can use a provided axes instance"""
+    birthdate = datetime.date(1990, 1, 1)
+    
+    # Create a figure and axes
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Create Lifegraph with the provided axes
+    g = Lifegraph(birthdate, size=Papersize.A4, dpi=100, max_age=80, ax=ax)
+    
+    # Verify that the provided axes is stored
+    assert g.ax is ax
+    assert g.owns_figure is False
+    
+    # Add some content
+    g.add_life_event('Test Event', datetime.date(2010, 5, 15), color='red')
+    
+    # Trigger drawing
+    g.save('/tmp/test_with_axes.png')
+    
+    # Verify that the axes received some content
+    # The axes should have plot lines from the grid
+    assert len(ax.lines) > 0
+    
+    # Clean up
+    plt.close(fig)
+
+def test_lifegraph_without_provided_axes():
+    """Test that Lifegraph still works without a provided axes (default behavior)"""
+    birthdate = datetime.date(1990, 1, 1)
+    
+    # Create Lifegraph without providing axes
+    g = Lifegraph(birthdate, size=Papersize.A4, dpi=100, max_age=80)
+    
+    # Verify that no axes is initially set
+    assert g.ax is None
+    assert g.owns_figure is True
+    
+    # Add some content
+    g.add_life_event('Test Event', datetime.date(2010, 5, 15), color='blue')
+    
+    # Trigger drawing
+    g.save('/tmp/test_without_axes.png')
+    
+    # After drawing, axes and fig should be created
+    assert g.ax is not None
+    assert g.fig is not None
+    
+    # Clean up
+    g.close()
+
+def test_lifegraph_axes_receives_annotations():
+    """Test that annotations are drawn on the provided axes"""
+    birthdate = datetime.date(1990, 1, 1)
+    
+    # Create a figure and axes
+    fig, ax = plt.subplots()
+    
+    # Create Lifegraph with the provided axes
+    g = Lifegraph(birthdate, max_age=50, ax=ax)
+    
+    # Add multiple life events
+    g.add_life_event('Event 1', datetime.date(2005, 3, 10), color='red')
+    g.add_life_event('Event 2', datetime.date(2010, 8, 20), color='blue')
+    
+    # Trigger drawing
+    g.save('/tmp/test_annotations.png')
+    
+    # Verify that annotations were added to the axes
+    # Annotations are added as text objects
+    assert len(ax.texts) > 0
+    
+    # Clean up
+    plt.close(fig)
+
+def test_lifegraph_axes_multiple_subplots():
+    """Test that Lifegraph can be used with multiple subplots"""
+    birthdate1 = datetime.date(1990, 1, 1)
+    birthdate2 = datetime.date(1995, 6, 15)
+    
+    # Create a figure with multiple subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    
+    # Create two Lifegraphs, each on a different axes
+    g1 = Lifegraph(birthdate1, max_age=50, ax=ax1)
+    g2 = Lifegraph(birthdate2, max_age=50, ax=ax2)
+    
+    # Add events to each
+    g1.add_life_event('Person 1 Event', datetime.date(2010, 1, 1), color='red')
+    g2.add_life_event('Person 2 Event', datetime.date(2015, 1, 1), color='blue')
+    
+    # Draw both
+    g1.save('/tmp/test_multi1.png')
+    g2.save('/tmp/test_multi2.png')
+    
+    # Verify both axes have content
+    assert len(ax1.lines) > 0
+    assert len(ax2.lines) > 0
+    
+    # Clean up
+    plt.close(fig)
