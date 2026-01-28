@@ -63,7 +63,7 @@ def test_side_enum():
     assert Side.LEFT != Side.RIGHT
     assert str(Side.LEFT) != str(Side.RIGHT)
 
-def test_lifegraph_with_provided_axes():
+def test_lifegraph_with_provided_axes(tmp_path):
     """Test that Lifegraph can use a provided axes instance"""
     birthdate = datetime.date(1990, 1, 1)
     
@@ -81,16 +81,20 @@ def test_lifegraph_with_provided_axes():
     g.add_life_event('Test Event', datetime.date(2010, 5, 15), color='red')
     
     # Trigger drawing
-    g.save('/tmp/test_with_axes.png')
+    output_file = tmp_path / "test_with_axes.png"
+    g.save(str(output_file))
     
     # Verify that the axes received some content
     # The axes should have plot lines from the grid
     assert len(ax.lines) > 0
     
+    # Verify the file was created
+    assert output_file.exists()
+    
     # Clean up
     plt.close(fig)
 
-def test_lifegraph_without_provided_axes():
+def test_lifegraph_without_provided_axes(tmp_path):
     """Test that Lifegraph still works without a provided axes (default behavior)"""
     birthdate = datetime.date(1990, 1, 1)
     
@@ -105,16 +109,20 @@ def test_lifegraph_without_provided_axes():
     g.add_life_event('Test Event', datetime.date(2010, 5, 15), color='blue')
     
     # Trigger drawing
-    g.save('/tmp/test_without_axes.png')
+    output_file = tmp_path / "test_without_axes.png"
+    g.save(str(output_file))
     
     # After drawing, axes and fig should be created
     assert g.ax is not None
     assert g.fig is not None
     
+    # Verify the file was created
+    assert output_file.exists()
+    
     # Clean up
     g.close()
 
-def test_lifegraph_axes_receives_annotations():
+def test_lifegraph_axes_receives_annotations(tmp_path):
     """Test that annotations are drawn on the provided axes"""
     birthdate = datetime.date(1990, 1, 1)
     
@@ -129,16 +137,20 @@ def test_lifegraph_axes_receives_annotations():
     g.add_life_event('Event 2', datetime.date(2010, 8, 20), color='blue')
     
     # Trigger drawing
-    g.save('/tmp/test_annotations.png')
+    output_file = tmp_path / "test_annotations.png"
+    g.save(str(output_file))
     
     # Verify that annotations were added to the axes
     # Annotations are added as text objects
     assert len(ax.texts) > 0
     
+    # Verify the file was created
+    assert output_file.exists()
+    
     # Clean up
     plt.close(fig)
 
-def test_lifegraph_axes_multiple_subplots():
+def test_lifegraph_axes_multiple_subplots(tmp_path):
     """Test that Lifegraph can be used with multiple subplots"""
     birthdate1 = datetime.date(1990, 1, 1)
     birthdate2 = datetime.date(1995, 6, 15)
@@ -154,13 +166,20 @@ def test_lifegraph_axes_multiple_subplots():
     g1.add_life_event('Person 1 Event', datetime.date(2010, 1, 1), color='red')
     g2.add_life_event('Person 2 Event', datetime.date(2015, 1, 1), color='blue')
     
-    # Draw both
-    g1.save('/tmp/test_multi1.png')
-    g2.save('/tmp/test_multi2.png')
+    # Draw both by calling save on each (or we could call a draw method if it were public)
+    output_file = tmp_path / "test_multiple.png"
+    # We need to trigger drawing on both before saving
+    # Since save calls __draw internally, we call save on both
+    # But only need to actually write the file once
+    g1.save(str(output_file))
+    g2.save(str(output_file))  # This will save the same figure again, which is fine
     
     # Verify both axes have content
     assert len(ax1.lines) > 0
     assert len(ax2.lines) > 0
+    
+    # Verify the file was created
+    assert output_file.exists()
     
     # Clean up
     plt.close(fig)
