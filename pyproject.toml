@@ -29,3 +29,10 @@ dev = [
     "pytest",
     "pytest-cov"
 ]
+
+docs = [
+    "sphinx>=7.0",
+    "furo",
+    "sphinx-copybutton",
+    "sphinx-autodoc-typehints",
+]

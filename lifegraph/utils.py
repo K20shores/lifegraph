@@ -9,6 +9,22 @@ for key, val in mcolors.CSS4_COLORS.items():
         colors.append((key, val))
 
 def random_color():
-    """Returns a random color defined in matplotlib.colors.BASE_COLORS or matplotlib.colors.CSS4_COLORS"""
+    """Return a random color from matplotlib's named color sets.
+
+    Selects a random color from the union of
+    :data:`matplotlib.colors.BASE_COLORS` and
+    :data:`matplotlib.colors.CSS4_COLORS`.
+
+    Returns
+    -------
+    str or tuple
+        A color value accepted by matplotlib (e.g. ``'red'`` or
+        ``(1.0, 0.0, 0.0)``).
+
+    Examples
+    --------
+    >>> from lifegraph.utils import random_color
+    >>> c = random_color()
+    """
     c = random.choice(colors)
     return c[1]
