@@ -35,6 +35,7 @@ Quick start
 
    tutorial
    api
+   changelog
 
 Indices and tables
 ------------------

@@ -66,10 +66,10 @@ automatically from the birthdate and the event date.
    birthday = date(1990, 11, 1)
    g = Lifegraph(birthday, dpi=300, size=Papersize.A4)
 
-   # Random colour when none is given
+   # Random color when none is given
    g.add_life_event("My first paycheck", date(2006, 8, 23))
 
-   # Hex colour + force label to the left side
+   # Hex color + force label to the left side
    g.add_life_event("Graduated\nhighschool", date(2008, 6, 2),
                      color="#00FF00", side=Side.LEFT)
 
@@ -80,14 +80,14 @@ automatically from the birthdate and the event date.
 
 Key parameters:
 
-* **color** -- any matplotlib colour (hex string, RGB tuple, named colour).
-  A random colour is chosen when omitted.
+* **color** -- any matplotlib color (hex string, RGB tuple, named color).
+  A random color is chosen when omitted.
 * **side** -- force the label to :attr:`~lifegraph.Side.LEFT` or
   :attr:`~lifegraph.Side.RIGHT`.
 * **hint** -- a ``(x, y)`` coordinate hint for the label position (mutually
   exclusive with *side*).
 * **color_square** -- when ``True`` (the default), the grid square itself is
-  coloured to match the label text.
+  colored to match the label text.
 
 Adding eras
 -----------
@@ -112,7 +112,7 @@ connected by a line:
    g.add_era_span("Road trip", date(2015, 6, 1), date(2015, 8, 30),
                    color="#D2691E")
 
-Set ``color_start_and_end_markers=True`` to also colour the grid squares at
+Set ``color_start_and_end_markers=True`` to also color the grid squares at
 the endpoints.
 
 Overlaying an image
@@ -141,8 +141,16 @@ lifegraph-specific parameters that you can override:
    # Move the x-axis label
    g.format_x_axis(positionx=0.5, color="red")
 
+   # Customise the y-axis label
+   g.format_y_axis(text="Your Age", color="green")
+
 The full set of configurable parameters for each paper size is defined in
-:class:`~lifegraph.configuration.LifegraphParams`.
+:class:`~lifegraph.configuration.LifegraphParams`.  Some parameters can
+also be set through convenience methods like
+:meth:`~lifegraph.Lifegraph.format_x_axis` and
+:meth:`~lifegraph.Lifegraph.format_y_axis`.  For example,
+``g.format_x_axis(positionx=0, positiony=0)`` is equivalent to
+``g.settings.otherParams['xlabel.position'] = (0, 0)``.
 
 Controlling annotation placement
 ---------------------------------
@@ -172,9 +180,42 @@ You can override the automatic placement with *hint* or *side*:
 Using a provided matplotlib axes
 ---------------------------------
 
-For advanced layouts you can pass your own axes to ``Lifegraph``.  This
-lets you compose multiple life graphs on one figure or mix life graphs
-with standard matplotlib plots.
+For advanced layouts you can pass your own axes to ``Lifegraph`` via the
+``ax`` parameter.  This lets you compose multiple life graphs on one figure
+or mix life graphs with standard matplotlib plots.
+
+When using provided axes:
+
+1. Call :meth:`~lifegraph.Lifegraph.draw` to render instead of
+   :meth:`~lifegraph.Lifegraph.show` or :meth:`~lifegraph.Lifegraph.save`.
+2. Manage the figure lifecycle yourself (``fig.savefig``, ``plt.close``).
+
+Single provided axes
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   from lifegraph import Lifegraph
+   from datetime import date
+
+   fig, ax = plt.subplots(figsize=(10, 8))
+
+   birthday = date(1990, 11, 1)
+   g = Lifegraph(birthday, max_age=50, ax=ax)
+
+   g.add_life_event("First Job", date(2012, 6, 1), color="#00FF00")
+   g.add_life_event("Got Married", date(2015, 8, 15), color="#FF1493")
+   g.add_life_event("Started PhD", date(2018, 9, 1), color="#1E90FF")
+
+   g.add_title("My Life (Single Axes Example)")
+   g.draw()
+
+   fig.savefig("provided_axes_single.png", dpi=300)
+   plt.close(fig)
+
+Multiple subplots
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -186,11 +227,13 @@ with standard matplotlib plots.
 
    g1 = Lifegraph(date(1985, 3, 15), max_age=50, ax=ax1)
    g1.add_life_event("Graduated", date(2007, 5, 20), color="#FFD700")
-   g1.add_title("Person 1")
+   g1.add_life_event("First Child", date(2012, 3, 10), color="#FF69B4")
+   g1.add_title("Person 1's Life")
 
    g2 = Lifegraph(date(1992, 7, 20), max_age=50, ax=ax2)
    g2.add_life_event("Career start", date(2014, 8, 1), color="#32CD32")
-   g2.add_title("Person 2")
+   g2.add_life_event("Bought House", date(2019, 11, 5), color="#8B4513")
+   g2.add_title("Person 2's Life")
 
    g1.draw()
    g2.draw()
@@ -199,11 +242,35 @@ with standard matplotlib plots.
    fig.savefig("side_by_side.png", dpi=300)
    plt.close(fig)
 
-When using provided axes:
+Mixing lifegraph with other plots
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Call :meth:`~lifegraph.Lifegraph.draw` to render instead of
-   :meth:`~lifegraph.Lifegraph.show` or :meth:`~lifegraph.Lifegraph.save`.
-2. Manage the figure lifecycle yourself (``fig.savefig``, ``plt.close``).
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   from lifegraph import Lifegraph
+   from datetime import date
+
+   fig = plt.figure(figsize=(16, 10))
+
+   ax1 = fig.add_subplot(2, 1, 1)
+   g = Lifegraph(date(1988, 5, 10), max_age=50, ax=ax1)
+   g.add_life_event("Career Change", date(2015, 1, 1), color="#FF6347")
+   g.add_title("Life Timeline")
+   g.draw()
+
+   ax2 = fig.add_subplot(2, 1, 2)
+   years = [2010, 2012, 2014, 2016, 2018, 2020]
+   happiness = [6, 7, 5, 8, 9, 8]
+   ax2.plot(years, happiness, marker="o", linewidth=2, color="#4169E1")
+   ax2.set_xlabel("Year")
+   ax2.set_ylabel("Happiness Level")
+   ax2.set_title("Happiness Over Time")
+   ax2.grid(True, alpha=0.3)
+
+   plt.tight_layout()
+   fig.savefig("mixed_plots.png", dpi=300)
+   plt.close(fig)
 
 Putting it all together
 -----------------------

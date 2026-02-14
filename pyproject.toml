@@ -12,7 +12,7 @@ authors = [
 license = "MIT"
 
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 
 dependencies = [
     "matplotlib>=3.0",
@@ -35,4 +35,5 @@ docs = [
     "furo",
     "sphinx-copybutton",
     "sphinx-autodoc-typehints",
+    "myst-parser",
 ]

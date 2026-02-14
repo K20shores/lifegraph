@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/acom_music_box
+      url: https://pypi.org/p/lifegraph
     permissions:
       id-token: write
 
