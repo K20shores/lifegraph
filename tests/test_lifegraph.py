@@ -138,6 +138,7 @@ def test_lifegraph_axes_receives_annotations(tmp_path):
     
     # Trigger drawing
     output_file = tmp_path / "test_annotations.png"
+    print("Saving to", output_file)
     g.save(str(output_file))
     
     # Verify that annotations were added to the axes
@@ -168,6 +169,7 @@ def test_lifegraph_axes_multiple_subplots(tmp_path):
     
     # Draw both by calling save on each (or we could call a draw method if it were public)
     output_file = tmp_path / "test_multiple.png"
+    print("Saving to", output_file)
     # We need to trigger drawing on both before saving
     # Since save calls __draw internally, we call save on both
     # But only need to actually write the file once
@@ -183,3 +185,6 @@ def test_lifegraph_axes_multiple_subplots(tmp_path):
     
     # Clean up
     plt.close(fig)
+
+if __name__ == "__main__":
+    pytest.main()

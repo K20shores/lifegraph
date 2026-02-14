@@ -277,6 +277,15 @@ class Lifegraph:
         self.image_name = image_name
         self.image_alpha = alpha
 
+    def draw(self):
+        """Draw the graph onto the axes.
+
+        This is useful when using a provided axes instance and you want to
+        trigger rendering without saving or showing. For example, when composing
+        multiple subplots and saving the figure yourself.
+        """
+        self.__draw()
+
     def show(self):
         """Show the graph"""
         self.__draw()
