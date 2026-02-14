@@ -14,21 +14,25 @@ from lifegraph.utils import random_color
 class Lifegraph:
     """This class will represent your life as a graph of boxes"""
 
-    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8]):
-        """Initalize the life graph
+    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8], ax=None):
+        """Initialize the life graph
 
         :param birthdate: The date to start the graph from
         :param size:  (Default value = Papersize.A3) A papersize in inches
         :param dpi: (Default value = 300) Dots per inch
         :param label_space_epsilon: (Default value = .2) The minimum amount of space allowed between annotation text objects
         :param max_age: (Default value = 90) The ending age of the graph
-        :param axes_rect: (Default value = [.25, .1, .5, .8]) The dimensions [left, bottom, width, height] of the axes instance passed to matplotlib.figure.Figure.add_axes
+        :param axes_rect: (Default value = [.25, .1, .5, .8]) The dimensions [left, bottom, width, height] of the axes instance passed to matplotlib.figure.Figure.add_axes. This parameter is ignored when ax is provided.
+        :param ax: (Default value = None) An optional matplotlib axes instance to draw on. If provided, lifegraph will draw on this axes instead of creating its own figure and axes.
 
         """
         if birthdate is None or not isinstance(birthdate, datetime.date):
             raise ValueError("birthdate must be a valid datetime.date object")
 
         self.birthdate = birthdate
+        self.ax = ax  # Store the provided axes instance
+        self.owns_figure = (ax is None)  # Track whether we created the figure
+        self._already_drawn = False  # Track if drawing has been done to prevent duplicates
 
         self.settings = LifegraphParams(size)
         self.settings.rcParams["figure.dpi"] = dpi
@@ -273,15 +277,27 @@ class Lifegraph:
         self.image_name = image_name
         self.image_alpha = alpha
 
-    def show(self):
-        """Show the grpah"""
+    def draw(self):
+        """Draw the graph onto the axes.
+
+        This is useful when using a provided axes instance and you want to
+        trigger rendering without saving or showing. For example, when composing
+        multiple subplots and saving the figure yourself.
+        """
         self.__draw()
-        plt.show()
+
+    def show(self):
+        """Show the graph"""
+        self.__draw()
+        if self.owns_figure:
+            plt.show()
+        # If not owning the figure, the user should call plt.show() on their figure
 
     def close(self):
         """Close the graph"""
-        self.fig.clf()
-        plt.close()
+        if self.owns_figure and hasattr(self, 'fig'):
+            self.fig.clf()
+            plt.close()
 
     def save(self, name, transparent=False):
         """Save the graph.
@@ -291,16 +307,27 @@ class Lifegraph:
 
         """
         self.__draw()
-        plt.savefig(name, transparent=transparent)
+        # Always save the figure, regardless of ownership
+        # This allows the user to call g.save() conveniently
+        self.fig.savefig(name, transparent=transparent)
     #endregion Public drawing methods
 
     #region Private drawing methods
     def __draw(self):
         """Internal, trigger drawing of the graph"""
+        # If already drawn and using provided axes, skip redrawing to avoid duplicates
+        if self._already_drawn and not self.owns_figure:
+            return
+            
         plt.rcParams.update(self.settings.rcParams)
 
-        self.fig = plt.figure()
-        self.ax = self.fig.add_axes(self.axes_rect)
+        # Use provided axes or create new figure and axes
+        if self.ax is None:
+            self.fig = plt.figure()
+            self.ax = self.fig.add_axes(self.axes_rect)
+        else:
+            # When using provided axes, get the figure from the axes
+            self.fig = self.ax.figure
 
         xs = np.arange(1, self.xmax+1)
         ys = [np.arange(0, self.ymax) for i in range(self.xmax)]
@@ -319,6 +346,9 @@ class Lifegraph:
         self.__draw_max_age()
 
         self.ax.set_aspect('equal', share=True)
+        
+        # Mark as drawn to prevent duplicate drawing with provided axes
+        self._already_drawn = True
 
     def __draw_xaxis(self):
         """Internal, draw the components of the x-axis"""

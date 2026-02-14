@@ -10,6 +10,9 @@
 [grid_add_image]: examples/images/grid_add_image.png "Add an image"
 [grid_customization]: examples/images/grid_customization.png "Customize the grid"
 [annotation_placement]: examples/images/placement.png "Annotation placement"
+[provided_axes_single]: examples/images/provided_axes_single.png "Single provided axes"
+[provided_axes_multiple]: examples/images/provided_axes_multiple.png "Multiple subplots"
+[provided_axes_mixed]: examples/images/provided_axes_mixed.png "Mixed plot types"
 
 # Life Graph
 [![License](https://img.shields.io/github/license/k20shores/lifegraph.svg)](https://github.com/k20shores/lifegraph/blob/main/LICENSE)
@@ -285,6 +288,96 @@ g.save("images/placement.png")
 ```
 
 ![Annotation Placement][annotation_placement]
+
+# Using a Provided Axes
+
+You can pass your own matplotlib axes to Lifegraph with the `ax` parameter. This lets you
+compose lifegraphs with other matplotlib plots or place multiple lifegraphs on a single figure.
+When using a provided axes, call `g.draw()` to render the lifegraph, then manage the figure
+lifecycle yourself.
+
+## Single Provided Axes
+```
+from lifegraph.lifegraph import Lifegraph, Papersize
+from datetime import date
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+birthday = date(1990, 11, 1)
+g = Lifegraph(birthday, max_age=50, ax=ax)
+
+g.add_life_event('First Job', date(2012, 6, 1), color='#00FF00')
+g.add_life_event('Got Married', date(2015, 8, 15), color='#FF1493')
+g.add_life_event('Started PhD', date(2018, 9, 1), color='#1E90FF')
+
+g.add_title("My Life (Single Axes Example)")
+g.draw()
+
+fig.savefig("provided_axes_single.png", dpi=300)
+plt.close(fig)
+```
+
+![Single provided axes][provided_axes_single]
+
+## Multiple Subplots
+```
+from lifegraph.lifegraph import Lifegraph, Papersize
+from datetime import date
+import matplotlib.pyplot as plt
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+
+g1 = Lifegraph(date(1985, 3, 15), max_age=50, ax=ax1)
+g2 = Lifegraph(date(1992, 7, 20), max_age=50, ax=ax2)
+
+g1.add_life_event('Graduated College', date(2007, 5, 20), color='#FFD700')
+g1.add_life_event('First Child', date(2012, 3, 10), color='#FF69B4')
+g1.add_title("Person 1's Life")
+
+g2.add_life_event('Started Career', date(2014, 8, 1), color='#32CD32')
+g2.add_life_event('Bought House', date(2019, 11, 5), color='#8B4513')
+g2.add_title("Person 2's Life")
+
+g1.draw()
+g2.draw()
+
+plt.tight_layout()
+fig.savefig("provided_axes_multiple.png", dpi=300)
+plt.close(fig)
+```
+
+![Multiple subplots][provided_axes_multiple]
+
+## Mixing Lifegraph with Other Plots
+```
+from lifegraph.lifegraph import Lifegraph, Papersize
+from datetime import date
+import matplotlib.pyplot as plt
+
+fig = plt.figure(figsize=(16, 10))
+
+ax1 = fig.add_subplot(2, 1, 1)
+g = Lifegraph(date(1988, 5, 10), max_age=50, ax=ax1)
+g.add_life_event('Career Change', date(2015, 1, 1), color='#FF6347')
+g.add_title("Life Timeline")
+g.draw()
+
+ax2 = fig.add_subplot(2, 1, 2)
+years = [2010, 2012, 2014, 2016, 2018, 2020]
+happiness = [6, 7, 5, 8, 9, 8]
+ax2.plot(years, happiness, marker='o', linewidth=2, color='#4169E1')
+ax2.set_xlabel('Year')
+ax2.set_ylabel('Happiness Level')
+ax2.set_title('Happiness Over Time')
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+fig.savefig("provided_axes_mixed.png", dpi=300)
+plt.close(fig)
+```
+
+![Mixed plot types][provided_axes_mixed]
 
 # Contributing and Code of Conduct
 [Read our contributing guidelines](docs/CONTRIBUTING)
