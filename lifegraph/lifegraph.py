@@ -12,20 +12,56 @@ from lifegraph.utils import random_color
 
 
 class Lifegraph:
-    """This class will represent your life as a graph of boxes"""
+    """Visualize a life as a grid of weekly squares.
+
+    Each row represents one year of life and each column one week, creating
+    a 52-column by *max_age*-row grid.  Events, eras, and other annotations
+    can be added and are automatically laid out to avoid overlapping labels.
+
+    Parameters
+    ----------
+    birthdate : datetime.date
+        The date to anchor the grid.  Row 0, column 1 corresponds to the
+        first week of life.
+    size : Papersize, optional
+        Paper size that controls default figure dimensions and styling
+        parameters.  Default is ``Papersize.A3``.
+    dpi : int, optional
+        Resolution in dots per inch.  Default is ``300``.
+    label_space_epsilon : float, optional
+        Minimum gap (in data units) the layout engine keeps between
+        annotation labels.  Default is ``0.2``.
+    max_age : int, optional
+        Number of rows (years) in the grid.  Default is ``90``.
+    axes_rect : list of float, optional
+        ``[left, bottom, width, height]`` passed to
+        :meth:`matplotlib.figure.Figure.add_axes`.  Ignored when *ax* is
+        provided.  Default is ``[0.25, 0.1, 0.5, 0.8]``.
+    ax : matplotlib.axes.Axes or None, optional
+        An existing axes to draw on.  When provided, the caller is
+        responsible for the figure lifecycle (saving, showing, closing).
+        Default is ``None`` (a new figure is created).
+
+    Examples
+    --------
+    Create a basic life graph and save it:
+
+    >>> from lifegraph import Lifegraph
+    >>> from datetime import date
+    >>> g = Lifegraph(date(1990, 11, 1))
+    >>> g.save("my_life.png")
+
+    Use a provided axes for subplot composition:
+
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots()
+    >>> g = Lifegraph(date(1990, 11, 1), ax=ax, max_age=50)
+    >>> g.draw()
+    >>> fig.savefig("subplot.png")
+    >>> plt.close(fig)
+    """
 
     def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8], ax=None):
-        """Initialize the life graph
-
-        :param birthdate: The date to start the graph from
-        :param size:  (Default value = Papersize.A3) A papersize in inches
-        :param dpi: (Default value = 300) Dots per inch
-        :param label_space_epsilon: (Default value = .2) The minimum amount of space allowed between annotation text objects
-        :param max_age: (Default value = 90) The ending age of the graph
-        :param axes_rect: (Default value = [.25, .1, .5, .8]) The dimensions [left, bottom, width, height] of the axes instance passed to matplotlib.figure.Figure.add_axes. This parameter is ignored when ax is provided.
-        :param ax: (Default value = None) An optional matplotlib axes instance to draw on. If provided, lifegraph will draw on this axes instead of creating its own figure and axes.
-
-        """
         if birthdate is None or not isinstance(birthdate, datetime.date):
             raise ValueError("birthdate must be a valid datetime.date object")
 
@@ -71,14 +107,26 @@ class Lifegraph:
 
     #region Public drawing methods
     def format_x_axis(self, text=None, positionx=None, positiony=None, color=None, fontsize=None):
-        """Format the x axis. This method is required.
+        """Customise the x-axis label appearance.
 
-        :param text: (Default value = None), If present, changes the text of the x-axis
-        :param positionx: (Default value = None) If present, changes the location of the x postion of the x-axis (in axes coordaintes)
-        :param positiony: (Default value = None) If present, changes the location of the y postion of the x-axis (in axes coordaintes)
-        :param color: (Default value = None) A matplotlib color
-        :param fontsize: (Default value = None) A matplotlib fontsize
+        All parameters are optional; only the supplied values are changed.
 
+        Parameters
+        ----------
+        text : str or None, optional
+            Replacement label text.
+        positionx : float or None, optional
+            X position of the label in axes coordinates.
+        positiony : float or None, optional
+            Y position of the label in axes coordinates.
+        color : str or tuple or None, optional
+            A matplotlib color.
+        fontsize : float or None, optional
+            Font size in points.
+
+        Examples
+        --------
+        >>> g.format_x_axis(text="Weeks", color="red", fontsize=14)
         """
         if text is not None:
             self.xaxis_label = text
@@ -97,14 +145,26 @@ class Lifegraph:
             self.settings.otherParams["xlabel.fontsize"] = fontsize
 
     def format_y_axis(self, text=None, positionx=None, positiony=None, color=None, fontsize=None):
-        """Format the y axis. This method is required.
+        """Customise the y-axis label appearance.
 
-        :param text: (Default value = None), If present, changes the text of the y-axis
-        :param positionx: (Default value = None) If present, changes the location of the x postion of the y-axis (in axes coordaintes)
-        :param positiony: (Default value = None) If present, changes the location of the y postion of the y-axis (in axes coordaintes)
-        :param color: (Default value = None) A matplotlib color
-        :param fontsize: (Default value = None) A matplotlib fontsize
+        All parameters are optional; only the supplied values are changed.
 
+        Parameters
+        ----------
+        text : str or None, optional
+            Replacement label text.
+        positionx : float or None, optional
+            X position of the label in axes coordinates.
+        positiony : float or None, optional
+            Y position of the label in axes coordinates.
+        color : str or tuple or None, optional
+            A matplotlib color.
+        fontsize : float or None, optional
+            Font size in points.
+
+        Examples
+        --------
+        >>> g.format_y_axis(text="Your Age", color="green")
         """
         if text is not None:
             self.xaxis_label = text
@@ -123,19 +183,52 @@ class Lifegraph:
             self.settings.otherParams["ylabel.fontsize"] = fontsize
 
     def show_max_age_label(self):
-        """Places the max age on the bottom right of the plot"""
+        """Display the maximum age number at the bottom-right of the grid.
+
+        Examples
+        --------
+        >>> g = Lifegraph(date(1990, 1, 1), max_age=100)
+        >>> g.show_max_age_label()
+        """
         self.draw_max_age = True
 
     def add_life_event(self, text, date, color=None, hint=None, side=None, color_square=True):
-        """Label an event in your life
+        """Add a labeled event to the graph.
 
-        :param text: The text the should appear for the life event
-        :param date: (Default value = None) When the event occurred
-        :param color: (Default value = None) A color useable by any matplotlib object
-        :param hint: (Default value = None) Mutually exclusive with side. Not required. If the default placement is not desired. A Point may be provided to help the graph decide where to place the label of the event.
-        :param side: (Default value = None) Mutually exclusive with hint. Not required. If not provided, the side is determined by the date. If provided, this value will put the label on the given side of the plot
-        :param color_square: (Default value = True) Colors the sqaure on the graph the same color as the text if True. The sqaure is the default color of the graph squares otherwise
+        The event position on the grid is calculated from the birthdate and
+        the event *date*.  An arrow connects the label text to the
+        corresponding grid square.
 
+        Parameters
+        ----------
+        text : str
+            Label text for the event.
+        date : datetime.date
+            When the event occurred.
+        color : str or tuple or None, optional
+            A matplotlib color.  A random color is chosen when ``None``.
+        hint : Point or tuple or None, optional
+            Approximate label position in data coordinates.  Mutually
+            exclusive with *side*.
+        side : Side or None, optional
+            Force the label to :attr:`Side.LEFT` or :attr:`Side.RIGHT`.
+            Mutually exclusive with *hint*.
+        color_square : bool, optional
+            If ``True`` (default), the grid square is colored to match the
+            label.
+
+        Raises
+        ------
+        ValueError
+            If *date* is outside the range ``[birthdate, birthdate + max_age)``.
+
+        Examples
+        --------
+        >>> from lifegraph import Lifegraph, Side
+        >>> from datetime import date
+        >>> g = Lifegraph(date(1990, 11, 1))
+        >>> g.add_life_event("Graduated", date(2012, 5, 20), color="#00FF00")
+        >>> g.add_life_event("Moved abroad", date(2015, 3, 1), side=Side.LEFT)
         """
         if (date < self.birthdate or date > (relativedelta(years=self.ymax) + self.birthdate)):
             raise ValueError(
@@ -158,15 +251,38 @@ class Lifegraph:
         self.annotations.append(a)
 
     def add_era(self, text, start_date, end_date, color=None, side=None, alpha=0.3):
-        """Color in a section of your life
+        """Highlight a period of your life with a colored background.
 
-        :param text: The label text for the era
-        :param start_date: When the event started
-        :param end_date: When the event ended
-        :param color: A color useable by any matplotlib object
-        :param side: (Default value = None) Mutually exclusive with hint. Not required. If not provided, the side is determined by the date. If provided, this value will put the label on the given side of the plot
-        :param alpha: (Default value = 0.3) the alpha value of the color
+        The background spans from *start_date* to *end_date* behind the grid
+        squares.
 
+        Parameters
+        ----------
+        text : str
+            Label text for the era.
+        start_date : datetime.date
+            When the era started.
+        end_date : datetime.date
+            When the era ended.
+        color : str or tuple or None, optional
+            A matplotlib color.  A random color is chosen when ``None``.
+        side : Side or None, optional
+            Force the label to a specific side of the grid.
+        alpha : float, optional
+            Opacity of the colored background.  Default is ``0.3``.
+
+        Raises
+        ------
+        ValueError
+            If either date is outside the valid range.
+
+        Examples
+        --------
+        >>> from lifegraph import Lifegraph
+        >>> from datetime import date
+        >>> g = Lifegraph(date(1990, 1, 1))
+        >>> g.add_era("College", date(2008, 9, 1), date(2012, 5, 15),
+        ...           color="blue", alpha=0.2)
         """
         if (start_date < self.birthdate or start_date > (relativedelta(years=self.ymax) + self.birthdate)):
             raise ValueError(
@@ -197,16 +313,43 @@ class Lifegraph:
         self.annotations.append(a)
 
     def add_era_span(self, text, start_date, end_date, color=None, hint=None, side=None, color_start_and_end_markers=False):
-        """Add a dumbbell around a section of your life
+        """Add a dumbbell-shaped annotation marking a time span.
 
-        :param text: The text labeling the span
-        :param start_date: When the era started
-        :param end_date: When the era ended
-        :param color: (Default value = random_color()) A matplotlib color
-        :param hint: (Default value = None) Mutually exclusive with side, a Point indicating where the label should be placed. This position will be honored if possible
-        :param side: (Default value = None) Mutually exclusive with hint. If Side.LEFT, the label will be on the left of the graph. Is Side.RIGHT, the label will be placed on the ride side of the graph
-        :param color_start_and_end_markers: Default value = False) Colors the sqaures indicating the start and end date on the graph the same color as the text if True. The sqaures are the default color of the graph squares otherwise
+        Circles are drawn at the start and end grid positions, connected by
+        a line, with a label pointing to the midpoint.
 
+        Parameters
+        ----------
+        text : str
+            Label text for the era span.
+        start_date : datetime.date
+            When the span started.
+        end_date : datetime.date
+            When the span ended.
+        color : str or tuple or None, optional
+            A matplotlib color.  A random color is chosen when ``None``.
+        hint : Point or tuple or None, optional
+            Approximate label position in data coordinates.  Mutually
+            exclusive with *side*.
+        side : Side or None, optional
+            Force the label to a specific side.  Mutually exclusive with
+            *hint*.
+        color_start_and_end_markers : bool, optional
+            If ``True``, the start and end grid squares are colored to match
+            the label.  Default is ``False``.
+
+        Raises
+        ------
+        ValueError
+            If either date is outside the valid range.
+
+        Examples
+        --------
+        >>> from lifegraph import Lifegraph
+        >>> from datetime import date
+        >>> g = Lifegraph(date(1990, 1, 1))
+        >>> g.add_era_span("Road trip", date(2015, 6, 1),
+        ...                date(2015, 8, 30), color="#D2691E")
         """
         if (start_date < self.birthdate or start_date > (relativedelta(years=self.ymax) + self.birthdate)):
             raise ValueError(
@@ -243,68 +386,114 @@ class Lifegraph:
                                            color=color, event_point=event_point, put_circle_around_point=False))
 
     def add_watermark(self, text):
-        """Adds a watermark to the graph. 
-        
-        If this function is not called, no watermark is drawn.
+        """Add diagonal watermark text across the graph.
 
-        :param text: The text of the watermark
+        Parameters
+        ----------
+        text : str
+            The watermark text.
 
+        Examples
+        --------
+        >>> g.add_watermark("DRAFT")
         """
         self.watermark_text = text
 
     def add_title(self, text, fontsize=None):
-        """Adds a title to the graph.
+        """Add a title above the graph.
 
-        If this function is not called, no title is drawn.
+        Parameters
+        ----------
+        text : str
+            Title text.
+        fontsize : float or None, optional
+            Font size in points.  Uses the paper-size default when ``None``.
 
-        :param text: The text to display as the title of the graph
-        :param fontsize: (Default value = None)
-
+        Examples
+        --------
+        >>> g.add_title("The Life of Ada Lovelace")
         """
         self.title = text
         if fontsize is not None:
             self.title_fontsize = fontsize
 
     def add_image(self, image_name, alpha=1):
-        """Adds an image that is cliped to the axes size of the graph.
+        """Overlay an image on the graph axes.
 
-        If this function is not called, no image is drawn.
+        The image is stretched to fill the grid area.
 
-        :param image_name: param alpha:  (Default value = 1)
-        :param alpha:  (Default value = 1)
+        Parameters
+        ----------
+        image_name : str
+            Path to the image file.
+        alpha : float, optional
+            Opacity of the image overlay.  Default is ``1``.
 
+        Examples
+        --------
+        >>> g.add_image("background.jpg", alpha=0.5)
         """
         self.image_name = image_name
         self.image_alpha = alpha
 
     def draw(self):
-        """Draw the graph onto the axes.
+        """Render the graph onto the axes.
 
-        This is useful when using a provided axes instance and you want to
-        trigger rendering without saving or showing. For example, when composing
-        multiple subplots and saving the figure yourself.
+        Call this explicitly when using a provided *ax* and you want to
+        trigger rendering before saving or showing the figure yourself.
+
+        Examples
+        --------
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax = plt.subplots()
+        >>> g = Lifegraph(date(1990, 1, 1), ax=ax, max_age=50)
+        >>> g.draw()
+        >>> fig.savefig("out.png")
+        >>> plt.close(fig)
         """
         self.__draw()
 
     def show(self):
-        """Show the graph"""
+        """Render the graph and display it interactively.
+
+        When using a provided axes, the caller should call
+        :func:`matplotlib.pyplot.show` on their own figure instead.
+
+        Examples
+        --------
+        >>> g = Lifegraph(date(1990, 1, 1))
+        >>> g.add_title("My Life")
+        >>> g.show()
+        """
         self.__draw()
         if self.owns_figure:
             plt.show()
         # If not owning the figure, the user should call plt.show() on their figure
 
     def close(self):
-        """Close the graph"""
+        """Close the figure and free resources.
+
+        Only has an effect when the figure was created internally (i.e. no
+        *ax* was provided).
+        """
         if self.owns_figure and hasattr(self, 'fig'):
             self.fig.clf()
             plt.close()
 
     def save(self, name, transparent=False):
-        """Save the graph.
+        """Render the graph and save it to a file.
 
-        :param name: The name and location the file should be saved at
-        :param transparent: Default value = False)
+        Parameters
+        ----------
+        name : str
+            Output file path (e.g. ``"my_life.png"``).
+        transparent : bool, optional
+            Save with a transparent background.  Default is ``False``.
 
+        Examples
+        --------
+        >>> g = Lifegraph(date(1990, 1, 1))
+        >>> g.save("my_life.png")
         """
         self.__draw()
         # Always save the figure, regardless of ownership
@@ -318,7 +507,7 @@ class Lifegraph:
         # If already drawn and using provided axes, skip redrawing to avoid duplicates
         if self._already_drawn and not self.owns_figure:
             return
-            
+
         plt.rcParams.update(self.settings.rcParams)
 
         # Use provided axes or create new figure and axes
@@ -346,7 +535,7 @@ class Lifegraph:
         self.__draw_max_age()
 
         self.ax.set_aspect('equal', share=True)
-        
+
         # Mark as drawn to prevent duplicate drawing with provided axes
         self._already_drawn = True
 
@@ -383,7 +572,7 @@ class Lifegraph:
 
     def __draw_annotations(self):
         """Internal, put all of the annotations on the graph
-        
+
         The arrowprops keyword arguments to the annotation, shrinkB, is calculated so that
         regardless of plot size, the edge of the annotaiton line ends at the edge of the circle
         """
@@ -436,7 +625,7 @@ class Lifegraph:
         This is done by placing a circle around the start and end point. Then a line is drawn
         starting at the edge of each circle. The edge is found using a quadrant sensitive inverse
         tangent function and parametric equations of a circle.
-        
+
         """
         for era in self.era_spans:
             radius = .5
@@ -508,7 +697,7 @@ class Lifegraph:
 
     def __resolve_annotation_conflicts(self, annotations):
         """Internal, Put annotation text labels on the graph while avoiding conflicts.
-        
+
         This method decides the final (x, y) coordinates for the graph such that
         no two text label bounding boxes overlap. This happens by placing the labels
         from the top of the graph to the bottom. If any label were to overlap with

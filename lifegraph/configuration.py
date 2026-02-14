@@ -1,7 +1,22 @@
 from enum import Enum
 
 class Papersize(Enum):
-    """A class holding papersize in inches"""
+    """Supported paper sizes for the life graph figure.
+
+    Each member maps to standard paper dimensions (in inches) that
+    determine the default figure size and all proportional styling
+    parameters.  ISO A-series sizes range from A0 (33.1 x 46.8 in) to
+    A10 (1.0 x 1.5 in).  US sizes include Letter (8.5 x 11 in), Legal,
+    JuniorLegal, HalfLetter, Ledger, and Tabloid.  The default for
+    :class:`~lifegraph.Lifegraph` is ``Papersize.A3``.
+
+    Examples
+    --------
+    >>> from lifegraph import Lifegraph
+    >>> from lifegraph.configuration import Papersize
+    >>> from datetime import date
+    >>> g = Lifegraph(date(1990, 1, 1), size=Papersize.Letter)
+    """
     A0 = 1, #[33.1, 46.8] inches
     A1 = 2, #[23.4, 33.1] inches
     A2 = 3, #[16.5, 23.4] inches
@@ -22,7 +37,33 @@ class Papersize(Enum):
 
 
 class LifegraphParams:
-    """A class that defines the defaults for drawing by papersize"""
+    """Drawing parameters scaled to a particular paper size.
+
+    On construction, two dictionaries are populated:
+
+    * ``rcParams`` -- values forwarded to :func:`matplotlib.pyplot.rcParams.update`.
+    * ``otherParams`` -- lifegraph-specific styling knobs (annotation offsets,
+      watermark size, era-span line widths, etc.).
+
+    Parameters
+    ----------
+    papersize : Papersize
+        The paper size to configure for.
+
+    Attributes
+    ----------
+    rcParams : dict
+        Matplotlib RC parameter overrides.
+    otherParams : dict
+        Lifegraph-specific styling parameters.
+
+    Examples
+    --------
+    >>> from lifegraph.configuration import LifegraphParams, Papersize
+    >>> params = LifegraphParams(Papersize.A4)
+    >>> params.rcParams["figure.figsize"]
+    [8.3, 11.7]
+    """
 
     def __init__(self, papersize):
         d = None

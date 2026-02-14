@@ -1,0 +1,242 @@
+Tutorial
+========
+
+This tutorial walks through creating a life graph from scratch, adding
+events, eras, and customisations along the way.
+
+Creating your first grid
+------------------------
+
+The minimal life graph needs only a birthdate.  Every square in the grid
+represents one week of your life.
+
+.. code-block:: python
+
+   from lifegraph import Lifegraph
+   from lifegraph.configuration import Papersize
+   from datetime import date
+
+   birthday = date(1990, 11, 1)
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4,
+                  axes_rect=[.1, .1, .8, .8])
+   g.save("grid.png")
+
+By default the axes leave room on the sides for annotation labels.  The
+``axes_rect`` parameter controls how much of the page the grid occupies --
+``[left, bottom, width, height]`` in figure-fraction coordinates.
+
+Adding a title and watermark
+----------------------------
+
+.. code-block:: python
+
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4)
+   g.add_title("Time is Not Equal to Money")
+   g.add_watermark("Your Life")
+   g.save("titled.png")
+
+:meth:`~lifegraph.Lifegraph.add_title` places text above the grid.
+:meth:`~lifegraph.Lifegraph.add_watermark` overlays faint diagonal text
+across the whole axes.
+
+Changing the maximum age
+------------------------
+
+The grid has 90 rows by default.  You can change this and optionally
+display the number at the bottom of the grid:
+
+.. code-block:: python
+
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
+   g.show_max_age_label()
+   g.save("max_age.png")
+
+Adding life events
+------------------
+
+A life event is a labeled point on the grid.  The position is calculated
+automatically from the birthdate and the event date.
+
+.. code-block:: python
+
+   from lifegraph import Lifegraph, Side
+   from lifegraph.configuration import Papersize
+   from datetime import date
+
+   birthday = date(1990, 11, 1)
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4)
+
+   # Random colour when none is given
+   g.add_life_event("My first paycheck", date(2006, 8, 23))
+
+   # Hex colour + force label to the left side
+   g.add_life_event("Graduated\nhighschool", date(2008, 6, 2),
+                     color="#00FF00", side=Side.LEFT)
+
+   # RGB tuple
+   g.add_life_event("First car", date(2010, 7, 14), color=(1, 0, 0))
+
+   g.save("events.png")
+
+Key parameters:
+
+* **color** -- any matplotlib colour (hex string, RGB tuple, named colour).
+  A random colour is chosen when omitted.
+* **side** -- force the label to :attr:`~lifegraph.Side.LEFT` or
+  :attr:`~lifegraph.Side.RIGHT`.
+* **hint** -- a ``(x, y)`` coordinate hint for the label position (mutually
+  exclusive with *side*).
+* **color_square** -- when ``True`` (the default), the grid square itself is
+  coloured to match the label text.
+
+Adding eras
+-----------
+
+Eras shade a rectangular region of the grid behind the squares:
+
+.. code-block:: python
+
+   g.add_era("College", date(2008, 9, 1), date(2012, 5, 15),
+             color="blue", alpha=0.2)
+
+The *alpha* parameter (default ``0.3``) controls the shading opacity.
+
+Adding era spans
+----------------
+
+Era spans draw a dumbbell shape -- circles at the start and end positions
+connected by a line:
+
+.. code-block:: python
+
+   g.add_era_span("Road trip", date(2015, 6, 1), date(2015, 8, 30),
+                   color="#D2691E")
+
+Set ``color_start_and_end_markers=True`` to also colour the grid squares at
+the endpoints.
+
+Overlaying an image
+-------------------
+
+You can overlay an image that fills the grid area:
+
+.. code-block:: python
+
+   g.add_image("photo.jpg", alpha=0.5)
+
+The *alpha* parameter controls transparency.
+
+Customising the grid style
+--------------------------
+
+Each paper size comes with a set of matplotlib RC parameters and
+lifegraph-specific parameters that you can override:
+
+.. code-block:: python
+
+   # Change marker shape and size
+   g.settings.rcParams["lines.marker"] = "v"
+   g.settings.rcParams["lines.markersize"] = 2.0
+
+   # Move the x-axis label
+   g.format_x_axis(positionx=0.5, color="red")
+
+The full set of configurable parameters for each paper size is defined in
+:class:`~lifegraph.configuration.LifegraphParams`.
+
+Controlling annotation placement
+---------------------------------
+
+By default, annotations for events in the first 26 weeks of a year appear
+on the left side; everything else on the right.  The layout engine
+automatically shifts labels downward to avoid overlap.
+
+You can override the automatic placement with *hint* or *side*:
+
+.. code-block:: python
+
+   from lifegraph.core import Point
+
+   # Place with a positional hint (data coordinates)
+   g.add_life_event("Event A", date(2006, 1, 23), color="r",
+                     hint=(10, -10))
+
+   # Force to the right side
+   g.add_life_event("Event B", date(2006, 1, 23), color="r",
+                     side=Side.RIGHT)
+
+   # Era span with a hint
+   g.add_era_span("Span", date(2010, 2, 1), date(2011, 8, 1),
+                   color="g", hint=Point(52, 105))
+
+Using a provided matplotlib axes
+---------------------------------
+
+For advanced layouts you can pass your own axes to ``Lifegraph``.  This
+lets you compose multiple life graphs on one figure or mix life graphs
+with standard matplotlib plots.
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   from lifegraph import Lifegraph
+   from datetime import date
+
+   fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+
+   g1 = Lifegraph(date(1985, 3, 15), max_age=50, ax=ax1)
+   g1.add_life_event("Graduated", date(2007, 5, 20), color="#FFD700")
+   g1.add_title("Person 1")
+
+   g2 = Lifegraph(date(1992, 7, 20), max_age=50, ax=ax2)
+   g2.add_life_event("Career start", date(2014, 8, 1), color="#32CD32")
+   g2.add_title("Person 2")
+
+   g1.draw()
+   g2.draw()
+
+   plt.tight_layout()
+   fig.savefig("side_by_side.png", dpi=300)
+   plt.close(fig)
+
+When using provided axes:
+
+1. Call :meth:`~lifegraph.Lifegraph.draw` to render instead of
+   :meth:`~lifegraph.Lifegraph.show` or :meth:`~lifegraph.Lifegraph.save`.
+2. Manage the figure lifecycle yourself (``fig.savefig``, ``plt.close``).
+
+Putting it all together
+-----------------------
+
+Here is a complete example combining several features:
+
+.. code-block:: python
+
+   from lifegraph import Lifegraph, Side
+   from lifegraph.configuration import Papersize
+   from lifegraph.core import Point
+   from datetime import date
+
+   birthday = date(1995, 11, 20)
+   g = Lifegraph(birthday, dpi=300, size=Papersize.Letter,
+                  label_space_epsilon=1)
+
+   g.add_life_event("Won an award", date(2013, 11, 20), "#014421")
+   g.add_life_event("Hiked the Rockies", date(2014, 2, 14), "#DC143C",
+                     hint=(25, -3))
+   g.add_life_event("First marathon", date(2017, 9, 11), "#990000")
+   g.add_life_event("Built a canoe", date(2018, 12, 8), "#87CEFA")
+   g.add_life_event("Started at Ecosia", date(2019, 1, 7), "#00008B")
+
+   g.add_era("Elementary School", date(2001, 8, 24), date(2007, 6, 5), "r")
+   g.add_era("High School", date(2010, 8, 24), date(2014, 6, 5), "#00838f")
+   g.add_era("College", date(2014, 9, 1), date(2018, 12, 14),
+             (80 / 255, 0, 0), side=Side.LEFT)
+
+   g.add_era_span("Longest vacation", date(2016, 8, 22),
+                   date(2016, 12, 16), "#D2691E", hint=Point(53, 28))
+
+   g.add_title("The Life of Someone")
+   g.show_max_age_label()
+
+   g.save("complete_life.png")
