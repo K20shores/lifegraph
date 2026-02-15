@@ -1,5 +1,8 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
 from datetime import date, datetime
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1995, 11, 20)
@@ -11,7 +14,7 @@ def main(path=None):
     g.add_life_event('Built a canoe', date(2018, 12, 8), '#87CEFA')
     g.add_life_event('Started working at\nEcosia', date(2019, 1, 7), '#00008B')
 
-    now = datetime.utcnow()
+    now = datetime.now(tz=None)
     g.add_life_event('Today', date(now.year, now.month, now.day), (0.75, 0, 0.75))
 
     g.add_era("Elementary School", date(2001, 8, 24), date(2007, 6, 5), 'r')
@@ -26,10 +29,8 @@ def main(path=None):
 
     g.show_max_age_label()
 
-    if path:
-        g.save(f"{path}/alife.png")
-    else:
-        g.save(f"images/alife.png")
+    output = Path(path) / "alife.png" if path else IMAGES_DIR / "alife.png"
+    g.save(str(output))
 
 if __name__ == "__main__":
     main("images")

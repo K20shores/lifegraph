@@ -35,7 +35,7 @@ def single_axes_example(path=None):
 
     # Since we provided the axes, we control the figure lifecycle
     output = Path(path) / "provided_axes_single.png" if path else IMAGES_DIR / "provided_axes_single.png"
-    fig.savefig(str(output), dpi=300)
+    fig.savefig(str(output), dpi=300, bbox_inches='tight')
 
     plt.close(fig)
 
@@ -70,7 +70,7 @@ def multiple_subplots_example(path=None):
     plt.tight_layout()
 
     output = Path(path) / "provided_axes_multiple.png" if path else IMAGES_DIR / "provided_axes_multiple.png"
-    fig.savefig(str(output), dpi=300)
+    fig.savefig(str(output), dpi=300, bbox_inches='tight')
 
     plt.close(fig)
 
@@ -103,7 +103,7 @@ def mixed_plot_example(path=None):
     plt.tight_layout()
 
     output = Path(path) / "provided_axes_mixed.png" if path else IMAGES_DIR / "provided_axes_mixed.png"
-    fig.savefig(str(output), dpi=300)
+    fig.savefig(str(output), dpi=300, bbox_inches='tight')
 
     plt.close(fig)
 

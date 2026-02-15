@@ -1,5 +1,8 @@
 from lifegraph.lifegraph import Lifegraph, Papersize
 from datetime import date
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
@@ -14,10 +17,8 @@ def main(path=None):
     # you can also choose the color
     g.add_era_span('Running for city\ncouncil', date(2019, 12, 10), date(2020, 11, 5), color="#4423fe")
 
-    if path:
-        g.save(f"{path}/grid_era_span.png")
-    else:
-        g.save("images/grid_era_span.png")
+    output = Path(path) / "grid_era_span.png" if path else IMAGES_DIR / "grid_era_span.png"
+    g.save(str(output))
 
 if __name__ == '__main__':
     main()

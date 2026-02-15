@@ -1,5 +1,8 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, Side
 from datetime import date
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
@@ -26,10 +29,8 @@ def main(path=None):
     # a side
     g.add_era_span('Blue thing', start_date=date(2014, 2, 1), end_date=date(2015, 8, 1), color='b', side=Side.LEFT)
 
-    if path:
-        g.save(f"{path}/placement.png")
-    else:
-        g.save("images/placement.png")
+    output = Path(path) / "placement.png" if path else IMAGES_DIR / "placement.png"
+    g.save(str(output))
 
 if __name__ == '__main__':
     main()

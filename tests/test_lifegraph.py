@@ -2,7 +2,7 @@ import pytest
 import datetime
 import matplotlib.pyplot as plt
 from lifegraph.lifegraph import random_color, Point, DatePosition, Marker, Annotation, Era, EraSpan, Lifegraph, Side
-from lifegraph.configuration import Papersize
+from lifegraph.configuration import Papersize, LifegraphParams, STYLE_PATH
 
 def test_random_color():
     color = random_color()
@@ -185,6 +185,47 @@ def test_lifegraph_axes_multiple_subplots(tmp_path):
     
     # Clean up
     plt.close(fig)
+
+def test_papersize_dimensions():
+    """Each Papersize member should have a 2-tuple of positive floats."""
+    for sz in Papersize:
+        w, h = sz.value
+        assert isinstance(w, (int, float)) and w > 0, f"{sz.name} width"
+        assert isinstance(h, (int, float)) and h > 0, f"{sz.name} height"
+
+def test_lifegraph_params_scaling():
+    """Computed params should produce sane values for a few sizes."""
+    small = LifegraphParams(Papersize.A10)
+    medium = LifegraphParams(Papersize.A3)
+    large = LifegraphParams(Papersize.A0)
+
+    # Marker size should grow with paper size
+    assert small.rcParams["lines.markersize"] < medium.rcParams["lines.markersize"]
+    assert medium.rcParams["lines.markersize"] < large.rcParams["lines.markersize"]
+
+    # Font size should grow with paper size
+    assert small.rcParams["font.size"] < medium.rcParams["font.size"]
+    assert medium.rcParams["font.size"] < large.rcParams["font.size"]
+
+    # Figure size should match enum dimensions
+    assert medium.rcParams["figure.figsize"] == [11.7, 16.5]
+    assert large.rcParams["figure.figsize"] == [33.1, 46.8]
+
+def test_style_file_exists():
+    """The bundled .mplstyle file should exist and be parseable."""
+    assert STYLE_PATH.exists()
+    import matplotlib
+    rc = matplotlib.rc_params_from_file(str(STYLE_PATH), use_default_template=False)
+    assert "axes.labelcolor" in rc
+    assert "lines.marker" in rc
+
+def test_all_papersizes_construct():
+    """LifegraphParams should succeed for every Papersize member."""
+    for sz in Papersize:
+        params = LifegraphParams(sz)
+        assert params.size is sz
+        assert "figure.figsize" in params.rcParams
+        assert "watermark.fontsize" in params.otherParams
 
 if __name__ == "__main__":
     pytest.main()
