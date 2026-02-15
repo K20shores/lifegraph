@@ -68,7 +68,6 @@ class Lifegraph:
         self.birthdate = birthdate
         self.ax = ax  # Store the provided axes instance
         self.owns_figure = (ax is None)  # Track whether we created the figure
-        self._already_drawn = False  # Track if drawing has been done to prevent duplicates
 
         self.settings = LifegraphParams(size)
         self.settings.rcParams["figure.dpi"] = dpi
@@ -504,10 +503,6 @@ class Lifegraph:
     #region Private drawing methods
     def __draw(self):
         """Internal, trigger drawing of the graph"""
-        # If already drawn and using provided axes, skip redrawing to avoid duplicates
-        if self._already_drawn and not self.owns_figure:
-            return
-
         plt.rcParams.update(self.settings.rcParams)
 
         # Use provided axes or create new figure and axes
@@ -519,9 +514,7 @@ class Lifegraph:
             self.fig = self.ax.figure
 
         # Apply spine styling directly to axes (handles provided axes case)
-        for spine in self.ax.spines.values():
-            spine.set_visible(False)
-            spine.set_linewidth(0.0)
+        self.ax.spines[:].set_visible(False)
 
         xs = np.arange(1, self.xmax+1)
         ys = [np.arange(0, self.ymax) for i in range(self.xmax)]
@@ -540,11 +533,6 @@ class Lifegraph:
         self.__draw_max_age()
 
         self.ax.set_aspect('equal', share=True)
-        self.ax.set_xlim(self.xlims)
-        self.ax.set_ylim(self.ylims[::-1])
-
-        # Mark as drawn to prevent duplicate drawing with provided axes
-        self._already_drawn = True
 
     def __draw_xaxis(self):
         """Internal, draw the components of the x-axis"""
