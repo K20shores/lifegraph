@@ -1,7 +1,13 @@
 # Changelog
 
-Starting with version 0.2.0, lifegraph releases use
-[semantic versioning](http://semver.org).
+
+## Version 0.3.0 (February 15, 2026)
+
+Features: 
+
+- Rework configuration: extract mplstyle, fix axes styling and layout by @K20shores in https://github.com/K20shores/lifegraph/pull/35
+
+[Full Changelog](https://github.com/K20shores/lifegraph/compare/v0.2.0...v0.3.0)
 
 ## Version 0.2.0 (February 14, 2026)
 
