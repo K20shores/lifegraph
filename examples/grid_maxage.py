@@ -1,15 +1,16 @@
 from lifegraph.lifegraph import Lifegraph, Papersize
 from datetime import date
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
     g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
     g.add_title("Time is Not Equal to Money")
     g.show_max_age_label()
-    if path:
-        g.save(f"{path}/grid_maxage.png")
-    else:
-        g.save("images/grid_maxage.png")
+    output = Path(path) / "grid_maxage.png" if path else IMAGES_DIR / "grid_maxage.png"
+    g.save(str(output))
 
 if __name__ == '__main__':
     main()

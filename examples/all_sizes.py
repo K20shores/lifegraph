@@ -1,14 +1,16 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
 from datetime import date, datetime, timedelta
-import os
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
-    image_path = os.path.join(os.path.dirname(__file__), "couple.jpg")
+    image_path = str(Path(__file__).parent / "couple.jpg")
 
     for sz in Papersize:
         print(f"{sz}")
-        g = Lifegraph(birthday, dpi=600, size=sz, label_space_epsilon=1)
+        g = Lifegraph(birthday, dpi=100, size=sz, label_space_epsilon=1)
 
         g.add_life_event('Married', date(2010, 2, 14), '#DC143C')
         g.add_life_event('Five Years\nTogether', date(2015, 2, 14), '#DC143C')
@@ -29,10 +31,8 @@ def main(path=None):
 
         g.show_max_age_label()
 
-        if path:
-            g.save(f"{path}/lifegraph_{sz.name}.png")
-        else:
-            g.save(f"images/lifegraph_{sz.name}.png")
+        output = Path(path) / f"lifegraph_{sz.name}.png" if path else IMAGES_DIR / f"lifegraph_{sz.name}.png"
+        g.save(str(output))
         g.close()
 
 if __name__ == '__main__':

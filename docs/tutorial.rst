@@ -129,8 +129,12 @@ The *alpha* parameter controls transparency.
 Customising the grid style
 --------------------------
 
-Each paper size comes with a set of matplotlib RC parameters and
-lifegraph-specific parameters that you can override:
+Lifegraph ships with a bundled ``.mplstyle`` file that provides the
+default appearance (marker shape, spine visibility, tick layout, etc.).
+Size-dependent values such as font sizes and marker sizes are computed
+automatically from the chosen paper size.
+
+You can override any setting through ``g.settings.rcParams``:
 
 .. code-block:: python
 
@@ -143,6 +147,17 @@ lifegraph-specific parameters that you can override:
 
    # Customise the y-axis label
    g.format_y_axis(text="Your Age", color="green")
+
+Advanced users can also use matplotlib's style system directly with the
+bundled style path, or combine it with their own style sheets:
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   from lifegraph.configuration import STYLE_PATH
+
+   plt.style.use(STYLE_PATH)          # apply the lifegraph defaults
+   plt.style.use([STYLE_PATH, "my_overrides.mplstyle"])  # layer styles
 
 The full set of configurable parameters for each paper size is defined in
 :class:`~lifegraph.configuration.LifegraphParams`.  Some parameters can

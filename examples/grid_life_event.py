@@ -1,5 +1,8 @@
 from lifegraph.lifegraph import Lifegraph, Papersize, Side
 from datetime import date
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
@@ -18,10 +21,8 @@ def main(path=None):
     # or RGB
     g.add_life_event('First car purchased', date(2010, 7, 14), color = (1, 0, 0))
 
-    if path:
-        g.save(f"{path}/grid_life_event.png")
-    else:
-        g.save("images/grid_life_event.png")
+    output = Path(path) / "grid_life_event.png" if path else IMAGES_DIR / "grid_life_event.png"
+    g.save(str(output))
 
 if __name__ == '__main__':
     main()

@@ -68,7 +68,6 @@ class Lifegraph:
         self.birthdate = birthdate
         self.ax = ax  # Store the provided axes instance
         self.owns_figure = (ax is None)  # Track whether we created the figure
-        self._already_drawn = False  # Track if drawing has been done to prevent duplicates
 
         self.settings = LifegraphParams(size)
         self.settings.rcParams["figure.dpi"] = dpi
@@ -498,16 +497,12 @@ class Lifegraph:
         self.__draw()
         # Always save the figure, regardless of ownership
         # This allows the user to call g.save() conveniently
-        self.fig.savefig(name, transparent=transparent)
+        self.fig.savefig(name, transparent=transparent, bbox_inches='tight')
     #endregion Public drawing methods
 
     #region Private drawing methods
     def __draw(self):
         """Internal, trigger drawing of the graph"""
-        # If already drawn and using provided axes, skip redrawing to avoid duplicates
-        if self._already_drawn and not self.owns_figure:
-            return
-
         plt.rcParams.update(self.settings.rcParams)
 
         # Use provided axes or create new figure and axes
@@ -517,6 +512,9 @@ class Lifegraph:
         else:
             # When using provided axes, get the figure from the axes
             self.fig = self.ax.figure
+
+        # Apply spine styling directly to axes (handles provided axes case)
+        self.ax.spines[:].set_visible(False)
 
         xs = np.arange(1, self.xmax+1)
         ys = [np.arange(0, self.ymax) for i in range(self.xmax)]
@@ -536,15 +534,12 @@ class Lifegraph:
 
         self.ax.set_aspect('equal', share=True)
 
-        # Mark as drawn to prevent duplicate drawing with provided axes
-        self._already_drawn = True
-
     def __draw_xaxis(self):
         """Internal, draw the components of the x-axis"""
         self.ax.set_xlim(self.xlims)
         # put x ticks on top
         xticks = [1]
-        xticks.extend(range(5, self.xmax+5, 5))
+        xticks.extend(range(5, self.xmax+1, 5))
         fs = self.settings.rcParams["axes.labelsize"] if self.settings.otherParams[
             "xlabel.fontsize"] is None else self.settings.otherParams["xlabel.fontsize"]
         color = self.settings.rcParams["axes.labelcolor"] if self.settings.otherParams[
@@ -552,8 +547,14 @@ class Lifegraph:
         self.ax.set_xticks(xticks)
         self.ax.set_xticklabels(xticks)
         self.ax.set_xlabel(self.xaxis_label, fontsize=fs, color=color)
-        self.ax.xaxis.set_label_coords(
-            *self.settings.otherParams["xlabel.position"])
+        self.ax.xaxis.set_label_position('top')
+        if self.owns_figure:
+            self.ax.xaxis.set_label_coords(
+                *self.settings.otherParams["xlabel.position"])
+        self.ax.tick_params(axis='x', which='major', top=False, bottom=False,
+                            labeltop=True, labelbottom=False, pad=-3,
+                            labelsize=self.settings.rcParams["xtick.labelsize"])
+        self.ax.tick_params(axis='x', which='minor', top=False, bottom=False)
 
     def __draw_yaxis(self):
         """Internal, draw the components of the y-axis"""
@@ -566,8 +567,13 @@ class Lifegraph:
             "ylabel.color"] is None else self.settings.otherParams["ylabel.color"]
         self.ax.set_yticks(yticks)
         self.ax.set_ylabel(self.yaxis_label, fontsize=fs, color=color)
-        self.ax.yaxis.set_label_coords(
-            *self.settings.otherParams["ylabel.position"])
+        if self.owns_figure:
+            self.ax.yaxis.set_label_coords(
+                *self.settings.otherParams["ylabel.position"])
+        self.ax.tick_params(axis='y', which='major', left=False, right=False,
+                            pad=-4,
+                            labelsize=self.settings.rcParams["ytick.labelsize"])
+        self.ax.tick_params(axis='y', which='minor', left=False, right=False)
         self.ax.invert_yaxis()
 
     def __draw_annotations(self):
@@ -678,15 +684,14 @@ class Lifegraph:
     def __draw_title(self):
         """Internal, draw the title"""
         if self.title is not None:
-            self.fig.suptitle(
-                self.title, y=self.settings.otherParams["figure.title.yposition"])
+            self.ax.set_title(self.title)
 
     def __draw_image(self):
         """Internal, draw the image"""
         if self.image_name is not None:
             img = mpimg.imread(self.image_name)
-            extent = (0.5, self.xmax+0.5, -0.5, self.ymax-0.5)
-            self.ax.imshow(img, extent=extent, origin='lower',
+            extent = (0.5, self.xmax+0.5, self.ymax-0.5, -0.5)
+            self.ax.imshow(img, extent=extent, origin='upper',
                            alpha=self.image_alpha)
 
     def __draw_max_age(self):

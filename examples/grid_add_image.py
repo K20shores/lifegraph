@@ -1,10 +1,12 @@
 from lifegraph.lifegraph import Lifegraph, Papersize
 from datetime import date
-import os
+from pathlib import Path
+
+IMAGES_DIR = Path(__file__).parent / "images"
 
 def main(path=None):
     birthday = date(1990, 11, 1)
-    image_path = os.path.join(os.path.dirname(__file__), "couple.jpg")
+    image_path = str(Path(__file__).parent / "couple.jpg")
     g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
 
     g.add_title("Time is Not Equal to Money")
@@ -12,10 +14,8 @@ def main(path=None):
 
     g.add_image(image_path, alpha=0.5)
 
-    if path:
-        g.save(f"{path}/grid_add_image.png")
-    else:
-        g.save("images/grid_add_image.png")
+    output = Path(path) / "grid_add_image.png" if path else IMAGES_DIR / "grid_add_image.png"
+    g.save(str(output))
 
 if __name__ == '__main__':
     main()

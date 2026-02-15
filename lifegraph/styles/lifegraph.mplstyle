@@ -1,0 +1,38 @@
+# Axes
+axes.labelcolor: blue
+axes.linewidth: 0.0
+axes.spines.bottom: False
+axes.spines.left: False
+axes.spines.right: False
+axes.spines.top: False
+
+# Lines / markers (the grid squares)
+lines.linestyle: none
+lines.marker: s
+lines.markeredgecolor: black
+lines.markerfacecolor: none
+markers.fillstyle: none
+
+# Text
+text.usetex: False
+
+# X ticks
+xtick.bottom: False
+xtick.color: black
+xtick.labeltop: True
+xtick.major.bottom: False
+xtick.major.pad: -3
+xtick.major.top: True
+xtick.minor.bottom: False
+xtick.minor.top: False
+xtick.top: False
+
+# Y ticks
+ytick.color: black
+ytick.left: False
+ytick.major.left: True
+ytick.major.pad: -4
+ytick.major.right: False
+ytick.minor.left: False
+ytick.minor.right: False
+ytick.right: False
