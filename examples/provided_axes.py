@@ -6,7 +6,7 @@ This example shows how to:
 2. Pass the axes to Lifegraph
 3. Use multiple lifegraphs on different subplots
 """
-from lifegraph.lifegraph import Lifegraph, Papersize
+from lifegraph.lifegraph import Lifegraph
 from datetime import date
 from pathlib import Path
 import matplotlib.pyplot as plt

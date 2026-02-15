@@ -1,5 +1,5 @@
-from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
-from datetime import date, datetime, timedelta
+from lifegraph.lifegraph import Lifegraph, Papersize, Point, Side
+from datetime import date
 from pathlib import Path
 
 IMAGES_DIR = Path(__file__).parent / "images"

@@ -670,9 +670,9 @@ class Lifegraph:
                 self.ax.plot(era.end_marker.x, era.end_marker.y, color=era.end_marker.color, marker=era.end_marker.marker,
                              fillstyle=era.end_marker.fillstyle)
 
-            l = mlines.Line2D([x1, x2], [y1, y2], color=era.color, linestyle=self.settings.otherParams["era.span.linestyle"],
+            line = mlines.Line2D([x1, x2], [y1, y2], color=era.color, linestyle=self.settings.otherParams["era.span.linestyle"],
                               markersize=self.settings.otherParams["era.span.markersize"], linewidth=self.settings.otherParams["annotation.line.width"])
-            self.ax.add_line(l)
+            self.ax.add_line(line)
 
     def __draw_watermark(self):
         """Internal, draw the watermakr"""
@@ -845,7 +845,7 @@ class Lifegraph:
         """
         if (hint is not None and side is not None):
             raise ValueError(
-                f"Hint and side are mutually exclusive arguments. Specify only one of them.")
+                "Hint and side are mutually exclusive arguments. Specify only one of them.")
         hint = self.__sanitize_hint(hint)
         labelx = default_x
         labely = default_y
@@ -856,7 +856,7 @@ class Lifegraph:
 
         if side is not None:
             if side == Side.LEFT:
-                labelx = 0 if is_Era == False else 1
+                labelx = 0 if not is_Era else 1
             else:
                 labelx = self.xmax
 

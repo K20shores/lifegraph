@@ -1,4 +1,4 @@
-from lifegraph.lifegraph import Lifegraph, Papersize, random_color, Point, Side
+from lifegraph.lifegraph import Lifegraph, Papersize, Point, Side
 from datetime import date, datetime
 from pathlib import Path
 

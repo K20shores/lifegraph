@@ -20,4 +20,4 @@ Examples
 
 __version__ = "0.2.0"
 
-from .lifegraph import Lifegraph, Side
+from .lifegraph import Lifegraph as Lifegraph, Side as Side
