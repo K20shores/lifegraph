@@ -57,6 +57,20 @@ g.show_max_age_label()
 g.save("images/alife.png")
 ```
 
+## Saving and Loading Configurations
+
+Export a lifegraph to a portable JSON or YAML file and recreate it later:
+
+```python
+# Export
+g.save_config("my_life.json")
+g.save_config("my_life.yaml", include_styling=True)  # requires: pip install lifegraph[yaml]
+
+# Import
+g = Lifegraph.from_config("my_life.json")
+g.save("my_life.png")
+```
+
 For tutorials, API reference, and more examples, see the [full documentation](https://lifegraph.readthedocs.io/en/latest/).
 
 # Contributing and Code of Conduct

@@ -31,7 +31,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
-    "pyyaml>=5.0"
+    "pyyaml>=5.1"
 ]
 
 docs = [
