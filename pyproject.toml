@@ -25,10 +25,13 @@ Homepage = "https://github.com/kyleshores/Life-Graph"
 
 [project.optional-dependencies]
 
+yaml = ["pyyaml>=5.0"]
+
 dev = [
     "pytest",
     "pytest-cov",
-    "ruff"
+    "ruff",
+    "pyyaml>=5.0"
 ]
 
 docs = [

@@ -8,6 +8,7 @@ import numpy as np
 
 from lifegraph.configuration import LifegraphParams, Papersize
 from lifegraph.core import Point, DatePosition, Marker, Annotation, Era, EraSpan, Side
+from lifegraph import serialization
 from lifegraph.utils import random_color
 
 
@@ -103,6 +104,12 @@ class Lifegraph:
         self.annotations = []
         self.eras = []
         self.era_spans = []
+
+        self.title_fontsize = None
+
+        self._event_records = []
+        self._era_records = []
+        self._era_span_records = []
 
     #region Public drawing methods
     def format_x_axis(self, text=None, positionx=None, positiony=None, color=None, fontsize=None):
@@ -236,6 +243,11 @@ class Lifegraph:
         if color is None:
             color = random_color()
 
+        self._event_records.append({
+            "text": text, "date": date, "color": color,
+            "hint": hint, "side": side, "color_square": color_square,
+        })
+
         default_x = self.xmax if (position.x >= self.xmax / 2) else 0
         label_point = self.__get_label_point(hint, side, default_x, position.y)
 
@@ -289,6 +301,11 @@ class Lifegraph:
 
         if color is None:
             color = random_color()
+
+        self._era_records.append({
+            "text": text, "start_date": start_date, "end_date": end_date,
+            "color": color, "side": side, "alpha": alpha,
+        })
 
         self.eras.append(
             Era(text, start_position, end_position, color, alpha=alpha))
@@ -349,6 +366,12 @@ class Lifegraph:
 
         if color is None:
             color = random_color()
+
+        self._era_span_records.append({
+            "text": text, "start_date": start_date, "end_date": end_date,
+            "color": color, "hint": hint, "side": side,
+            "color_start_and_end_markers": color_start_and_end_markers,
+        })
 
         start_position = self.__to_date_position(start_date)
         end_position = self.__to_date_position(end_date)
@@ -488,6 +511,40 @@ class Lifegraph:
         # Always save the figure, regardless of ownership
         # This allows the user to call g.save() conveniently
         self.fig.savefig(name, transparent=transparent, bbox_inches='tight')
+
+    def save_config(self, path, include_styling=False):
+        """Export the graph configuration to a JSON or YAML file.
+
+        The file format is inferred from the extension: ``.json`` for JSON,
+        ``.yaml`` or ``.yml`` for YAML.
+
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            Output file path.
+        include_styling : bool, optional
+            If ``True``, axis label customisations are included.
+            Default is ``False``.
+        """
+        serialization.export_config(self, path, include_styling=include_styling)
+
+    @classmethod
+    def from_config(cls, path, apply_styling=True):
+        """Create a Lifegraph from a previously exported config file.
+
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            Path to a ``.json``, ``.yaml``, or ``.yml`` config file.
+        apply_styling : bool, optional
+            If ``True`` (default) and the file contains a ``styling``
+            section, axis customisations are applied.
+
+        Returns
+        -------
+        Lifegraph
+        """
+        return serialization.import_config(cls, path, apply_styling=apply_styling)
     #endregion Public drawing methods
 
     #region Private drawing methods
