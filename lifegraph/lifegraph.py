@@ -639,7 +639,7 @@ class Lifegraph:
         """Internal, put all of the annotations on the graph
 
         The arrowprops keyword arguments to the annotation, shrinkB, is calculated so that
-        regardless of plot size, the edge of the annotaiton line ends at the edge of the circle
+        regardless of plot size, the edge of the annotation line ends at the edge of the circle
         """
         visible = [a for a in self.annotations if self.__is_annotation_visible(a)]
         final = self.__resolve_annotation_conflicts(visible)
