@@ -439,5 +439,98 @@ def test_resolve_annotation_conflicts(tmp_path):
 
     plt.close(fig)
 
+def test_lifegraph_init_min_age():
+    """min_age should be stored and ymin computed correctly."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=65, min_age=20)
+    assert g.min_age == 20
+    assert g.ymin == 19.5
+    assert g.ymax == 65
+
+
+def test_lifegraph_min_age_default_zero():
+    """Default min_age should be 0 for backward compatibility."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100)
+    assert g.min_age == 0
+    assert g.ymin == -0.5
+
+
+def test_lifegraph_min_age_validation():
+    """Negative min_age and min_age >= max_age should raise ValueError."""
+    birthdate = datetime.date(1990, 1, 1)
+    with pytest.raises(ValueError):
+        Lifegraph(birthdate, dpi=100, max_age=80, min_age=-1)
+    with pytest.raises(ValueError):
+        Lifegraph(birthdate, dpi=100, max_age=80, min_age=80)
+    with pytest.raises(ValueError):
+        Lifegraph(birthdate, dpi=100, max_age=80, min_age=90)
+
+
+def test_lifegraph_min_age_events_accepted_but_not_drawn(tmp_path):
+    """Events outside the visible range should be stored but render succeeds."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=65, min_age=20)
+    # Event at age ~5, outside visible range
+    g.add_life_event("Childhood event", datetime.date(1995, 6, 1), color="red")
+    # Event at age ~30, inside visible range
+    g.add_life_event("Adult event", datetime.date(2020, 6, 1), color="blue")
+    assert len(g.annotations) == 2
+    output = tmp_path / "min_age_events.png"
+    g.save(str(output))
+    assert output.exists()
+    g.close()
+
+
+def test_lifegraph_min_age_eras_clipped(tmp_path):
+    """Eras crossing the min_age boundary should be clipped; fully-outside skipped."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=65, min_age=20)
+    # Era entirely below min_age (ages 5-15)
+    g.add_era("Childhood", datetime.date(1995, 1, 1), datetime.date(2005, 1, 1), color="red")
+    # Era crossing boundary (ages 15-25)
+    g.add_era("Transition", datetime.date(2005, 1, 1), datetime.date(2015, 1, 1), color="blue")
+    # Era entirely in range (ages 25-35)
+    g.add_era("Career", datetime.date(2015, 1, 1), datetime.date(2025, 1, 1), color="green")
+    assert len(g.eras) == 3
+    output = tmp_path / "min_age_eras.png"
+    g.save(str(output))
+    assert output.exists()
+    g.close()
+
+
+def test_lifegraph_min_age_era_spans_filtered(tmp_path):
+    """Era spans entirely outside the visible range should be skipped."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=65, min_age=20)
+    # Span entirely below min_age
+    g.add_era_span("Early", datetime.date(1995, 1, 1), datetime.date(1998, 1, 1), color="red")
+    # Span in range
+    g.add_era_span("Later", datetime.date(2015, 1, 1), datetime.date(2020, 1, 1), color="blue")
+    assert len(g.era_spans) == 2
+    output = tmp_path / "min_age_spans.png"
+    g.save(str(output))
+    assert output.exists()
+    g.close()
+
+
+def test_lifegraph_min_age_render_full(tmp_path):
+    """Full render with all features + min_age should succeed."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=65, min_age=20)
+    g.add_title("Ages 20-65")
+    g.add_watermark("TEST")
+    g.show_max_age_label()
+    g.add_life_event("Age 25 event", datetime.date(2015, 6, 1), color="red")
+    g.add_life_event("Age 30 event", datetime.date(2020, 6, 1), color="blue", side=Side.LEFT)
+    g.add_era("Work", datetime.date(2015, 1, 1), datetime.date(2025, 1, 1), color="green")
+    g.add_era_span("Travel", datetime.date(2018, 6, 1), datetime.date(2019, 6, 1), color="#D2691E")
+    output = tmp_path / "min_age_full.png"
+    g.save(str(output))
+    assert output.exists()
+    assert output.stat().st_size > 0
+    g.close()
+
+
 if __name__ == "__main__":
     pytest.main()

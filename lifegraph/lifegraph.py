@@ -62,9 +62,14 @@ class Lifegraph:
     >>> plt.close(fig)
     """
 
-    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect=None, ax=None):
+    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, min_age=0, axes_rect=None, ax=None):
         if birthdate is None or not isinstance(birthdate, datetime.date):
             raise ValueError("birthdate must be a valid datetime.date object")
+
+        if min_age < 0:
+            raise ValueError("min_age must be >= 0")
+        if min_age >= max_age:
+            raise ValueError("min_age must be less than max_age")
 
         self.birthdate = birthdate
         self.ax = ax  # Store the provided axes instance
@@ -76,11 +81,12 @@ class Lifegraph:
 
         self.renderer = None
 
-        # the data limits, we want a grid of 52 weeks by 90 years
-        # negative minimum so that ths squares are not cut off
+        # the data limits, we want a grid of 52 weeks by max_age years
+        # negative minimum so that the squares are not cut off
         self.xmin = -.5
         self.xmax = 52
-        self.ymin = -.5
+        self.min_age = min_age
+        self.ymin = min_age - .5
         self.ymax = max_age
 
         self.xlims = [self.xmin, self.xmax]
@@ -256,7 +262,8 @@ class Lifegraph:
             marker = Marker(position.x, position.y, color=color)
 
         a = Annotation(date, text, label_point=label_point, color=color,
-                       event_point=Point(position.x, position.y), marker=marker)
+                       event_point=Point(position.x, position.y), marker=marker,
+                       source_y_range=(position.y, position.y))
         self.annotations.append(a)
 
     def add_era(self, text, start_date, end_date, color=None, side=None, alpha=0.3):
@@ -319,7 +326,8 @@ class Lifegraph:
         middle_date = start_date + (end_date - start_date)/2
 
         a = Annotation(middle_date, text, label_point=label_point, color=color,
-                       event_point=label_point, put_circle_around_point=False)
+                       event_point=label_point, put_circle_around_point=False,
+                       source_y_range=(start_position.y, end_position.y))
         self.annotations.append(a)
 
     def add_era_span(self, text, start_date, end_date, color=None, hint=None, side=None, color_start_and_end_markers=False):
@@ -395,7 +403,8 @@ class Lifegraph:
             (start_position.y, end_position.y)))
 
         self.annotations.append(Annotation(middle_date, text, label_point=label_point,
-                                           color=color, event_point=event_point, put_circle_around_point=False))
+                                           color=color, event_point=event_point, put_circle_around_point=False,
+                                           source_y_range=(start_position.y, end_position.y)))
 
     def add_watermark(self, text):
         """Add diagonal watermark text across the graph.
@@ -564,7 +573,7 @@ class Lifegraph:
         self.ax.spines[:].set_visible(False)
 
         xs = np.arange(1, self.xmax+1)
-        ys = [np.arange(0, self.ymax) for i in range(self.xmax)]
+        ys = [np.arange(self.min_age, self.ymax) for i in range(self.xmax)]
 
         self.ax.plot(xs, ys)
 
@@ -607,7 +616,10 @@ class Lifegraph:
         """Internal, draw the components of the y-axis"""
         self.ax.set_ylim(self.ylims)
         # set y ticks
-        yticks = [*range(0, self.ymax, 5)]
+        # Start from the first multiple of 5 >= min_age
+        first_tick_5 = self.min_age + (5 - self.min_age % 5) % 5
+        yticks = [self.min_age] if self.min_age % 5 != 0 else []
+        yticks.extend(range(first_tick_5, self.ymax, 5))
         fs = self.settings.rcParams["axes.labelsize"] if self.settings.otherParams[
             "ylabel.fontsize"] is None else self.settings.otherParams["ylabel.fontsize"]
         color = self.settings.rcParams["axes.labelcolor"] if self.settings.otherParams[
@@ -629,7 +641,8 @@ class Lifegraph:
         The arrowprops keyword arguments to the annotation, shrinkB, is calculated so that
         regardless of plot size, the edge of the annotaiton line ends at the edge of the circle
         """
-        final = self.__resolve_annotation_conflicts(self.annotations)
+        visible = [a for a in self.annotations if self.__is_annotation_visible(a)]
+        final = self.__resolve_annotation_conflicts(visible)
 
         shrinkB = self.settings.rcParams["lines.markersize"]+self.settings.rcParams["lines.markeredgewidth"]
         for a in final:
@@ -657,7 +670,13 @@ class Lifegraph:
         xmin = self.ax.transLimits.transform((1-.5, 0))[0]
         xmax = self.ax.transLimits.transform((self.xmax+.5, 0))[0]
         for era in self.eras:
-            for y in range(era.start.y, era.end.y+1):
+            # skip eras entirely outside the visible range
+            if era.end.y < self.min_age or era.start.y >= self.ymax:
+                continue
+            # clip row iteration to visible range
+            row_start = max(era.start.y, self.min_age)
+            row_end = min(era.end.y, self.ymax - 1)
+            for y in range(row_start, row_end+1):
                 if y == era.start.y:
                     axesUnits = self.ax.transLimits.transform(
                         (era.start.x-.5, era.start.y))
@@ -681,6 +700,9 @@ class Lifegraph:
 
         """
         for era in self.era_spans:
+            # skip era spans entirely outside the visible range
+            if era.end.y < self.min_age or era.start.y >= self.ymax:
+                continue
             radius = .5
             circle1 = plt.Circle((era.start.x, era.start.y), radius,
                                  color=era.color, fill=False, lw=self.settings.otherParams["annotation.edge.width"])
@@ -737,7 +759,7 @@ class Lifegraph:
         """Internal, draw the image"""
         if self.image_name is not None:
             img = mpimg.imread(self.image_name)
-            extent = (0.5, self.xmax+0.5, self.ymax-0.5, -0.5)
+            extent = (0.5, self.xmax+0.5, self.ymax-0.5, self.min_age - 0.5)
             self.ax.imshow(img, extent=extent, origin='upper',
                            alpha=self.image_alpha)
 
@@ -774,7 +796,7 @@ class Lifegraph:
             width = a.bbox.width
             # to preserve hint values, only set the x value if it is inside the graph
             # or if it is not at least as far as the offset
-            if a.y >= 0 and a.y <= self.ymax:
+            if a.y >= self.min_age and a.y <= self.ymax:
                 if ((a.x >= self.xmax / 2) and (a.x < self.xmax)) or (a.x >= self.xmax and a.x < self.xmax + self.settings.otherParams["annotation.right.offset"]):
                     a.x = self.xmax + \
                         self.settings.otherParams["annotation.right.offset"]
@@ -789,7 +811,7 @@ class Lifegraph:
                 if (a.x < self.xmax / 2):
                     a.set_relpos((1, 0.5))
                     left.append(a)
-            elif a.y < 0:
+            elif a.y < self.min_age:
                 a.set_relpos((0.5, 0))
                 right.append(a)
             elif a.y > self.ymax:
@@ -819,6 +841,13 @@ class Lifegraph:
             final.extend(_f)
 
         return final
+
+    def __is_annotation_visible(self, a):
+        """Return True if the annotation's source overlaps [min_age, max_age)."""
+        if a.source_y_range is None:
+            return True
+        y_lo, y_hi = a.source_y_range
+        return y_hi >= self.min_age and y_lo < self.ymax
 
     def __validate_date(self, date):
         """Raise ValueError if *date* is outside ``[birthdate, birthdate + max_age]``."""
@@ -858,7 +887,7 @@ class Lifegraph:
             edge = 10
             if not isinstance(hint, Point):
                 hint = Point(hint[0], hint[1])
-            if hint.y >= 0 and hint.y <= self.ymax:
+            if hint.y >= self.min_age and hint.y <= self.ymax:
                 if (hint.x >= self.xmax / 2 and hint.x < self.xmax) or hint.x > self.xmax + edge:
                     hint.x = self.xmax
                 if (hint.x > 0 and hint.x < self.xmax / 2) or hint.x < -edge:

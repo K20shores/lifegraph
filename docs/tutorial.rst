@@ -51,6 +51,16 @@ display the number at the bottom of the grid:
    g.show_max_age_label()
    g.save("max_age.png")
 
+You can also set a minimum age to display only a sub-range of the grid.
+Events outside the visible range are stored but not drawn; eras that
+cross the boundary are clipped automatically:
+
+.. code-block:: python
+
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4,
+                  max_age=65, min_age=20)
+   g.save("working_years.png")
+
 Adding life events
 ------------------
 
