@@ -862,9 +862,7 @@ class Lifegraph:
         :param date: A datetime
 
         """
-        delta = date - self.birthdate
-
-        year = delta.days // 365
+        year = relativedelta(date, self.birthdate).years
         # Assume the start of the year for each year of your life is your birthdate
         # something that happens within or up to (not including) 7 days after the start
         # of the year happens in the first week of your life that year
