@@ -227,5 +227,217 @@ def test_all_papersizes_construct():
         assert "figure.figsize" in params.rcParams
         assert "watermark.fontsize" in params.otherParams
 
+def test_validate_date():
+    """Dates outside [birthdate, birthdate + max_age] should raise ValueError."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=80)
+
+    # Before birthdate
+    with pytest.raises(ValueError):
+        g.add_life_event("Too early", datetime.date(1989, 12, 31), color="r")
+
+    # After max age
+    with pytest.raises(ValueError):
+        g.add_life_event("Too late", datetime.date(2071, 1, 2), color="r")
+
+    # Boundary: exactly birthdate — should not raise
+    g.add_life_event("Birth", datetime.date(1990, 1, 1), color="r")
+
+    # Boundary: exactly max age date — should not raise
+    g.add_life_event("Max", datetime.date(2070, 1, 1), color="r")
+
+    g.close()
+
+def test_format_x_axis():
+    """format_x_axis should update x-axis label, position, color, and fontsize."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+
+    g.format_x_axis(text="Weeks")
+    assert g.xaxis_label == "Weeks"
+
+    g.format_x_axis(positionx=0.5, positiony=1.1)
+    assert g.settings.otherParams["xlabel.position"] == (0.5, 1.1)
+
+    g.format_x_axis(color="red")
+    assert g.settings.otherParams["xlabel.color"] == "red"
+
+    g.format_x_axis(fontsize=18)
+    assert g.settings.otherParams["xlabel.fontsize"] == 18
+
+    # Partial update should preserve other position component
+    g.format_x_axis(positionx=0.3)
+    assert g.settings.otherParams["xlabel.position"] == (0.3, 1.1)
+
+def test_format_y_axis():
+    """format_y_axis should update y-axis label, position, color, and fontsize."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+
+    g.format_y_axis(text="Your Age")
+    assert g.yaxis_label == "Your Age"
+    # Ensure it didn't accidentally modify x-axis
+    assert g.xaxis_label != "Your Age"
+
+    g.format_y_axis(positionx=-0.05, positiony=0.9)
+    assert g.settings.otherParams["ylabel.position"] == (-0.05, 0.9)
+
+    g.format_y_axis(color="green")
+    assert g.settings.otherParams["ylabel.color"] == "green"
+
+    g.format_y_axis(fontsize=16)
+    assert g.settings.otherParams["ylabel.fontsize"] == 16
+
+def test_show_max_age_label():
+    """show_max_age_label should set the draw_max_age flag."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+    assert g.draw_max_age is False
+    g.show_max_age_label()
+    assert g.draw_max_age is True
+
+def test_add_title():
+    """add_title should store the title text and optional fontsize."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+    assert g.title is None
+
+    g.add_title("My Life")
+    assert g.title == "My Life"
+
+    g.add_title("My Life v2", fontsize=24)
+    assert g.title == "My Life v2"
+    assert g.title_fontsize == 24
+
+def test_add_watermark():
+    """add_watermark should store the watermark text."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+    assert g.watermark_text is None
+    g.add_watermark("DRAFT")
+    assert g.watermark_text == "DRAFT"
+
+def test_add_image():
+    """add_image should store the image path and alpha."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100)
+    assert g.image_name is None
+
+    g.add_image("/some/path.png", alpha=0.5)
+    assert g.image_name == "/some/path.png"
+    assert g.image_alpha == 0.5
+
+def test_add_era():
+    """add_era should append to the eras list."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
+    assert len(g.eras) == 0
+
+    g.add_era("College", datetime.date(2008, 9, 1), datetime.date(2012, 5, 15), color="blue")
+    assert len(g.eras) == 1
+    assert g.eras[0].text == "College"
+
+    # With side
+    g.add_era("Work", datetime.date(2012, 6, 1), datetime.date(2020, 1, 1), color="green", side=Side.LEFT)
+    assert len(g.eras) == 2
+
+def test_add_era_validates_dates():
+    """add_era should reject dates outside the valid range."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
+
+    with pytest.raises(ValueError):
+        g.add_era("Bad", datetime.date(1989, 1, 1), datetime.date(2000, 1, 1), color="r")
+
+    with pytest.raises(ValueError):
+        g.add_era("Bad", datetime.date(2000, 1, 1), datetime.date(2080, 1, 1), color="r")
+
+def test_add_era_span():
+    """add_era_span should append to the era_spans list."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
+    assert len(g.era_spans) == 0
+
+    g.add_era_span("Road trip", datetime.date(2015, 6, 1), datetime.date(2015, 8, 30), color="#D2691E")
+    assert len(g.era_spans) == 1
+    assert g.era_spans[0].text == "Road trip"
+
+    # With colored markers
+    g.add_era_span("Gap year", datetime.date(2016, 1, 1), datetime.date(2016, 12, 31),
+                    color="green", color_start_and_end_markers=True)
+    assert len(g.era_spans) == 2
+    assert g.era_spans[1].start_marker is not None
+    assert g.era_spans[1].end_marker is not None
+
+def test_add_era_span_validates_dates():
+    """add_era_span should reject dates outside the valid range."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
+
+    with pytest.raises(ValueError):
+        g.add_era_span("Bad", datetime.date(1989, 1, 1), datetime.date(2000, 1, 1), color="r")
+
+    with pytest.raises(ValueError):
+        g.add_era_span("Bad", datetime.date(2000, 1, 1), datetime.date(2080, 1, 1), color="r")
+
+def test_to_date_position_birthday():
+    """Birthday should map to week 1, year 0."""
+    birthday = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthday, dpi=100)
+    pos = g._Lifegraph__to_date_position(birthday)
+    assert pos.x == 1
+    assert pos.y == 0
+
+def test_to_date_position_one_week_later():
+    """One week after birthday should be week 2, year 0."""
+    birthday = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthday, dpi=100)
+    pos = g._Lifegraph__to_date_position(datetime.date(1990, 1, 8))
+    assert pos.x == 2
+    assert pos.y == 0
+
+def test_to_date_position_one_year_later():
+    """Exactly one year later should be week 1, year 1."""
+    birthday = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthday, dpi=100)
+    pos = g._Lifegraph__to_date_position(datetime.date(1991, 1, 1))
+    assert pos.x == 1
+    assert pos.y == 1
+
+def test_to_date_position_leap_year_birthday():
+    """Leap-year birthday should still map correctly."""
+    birthday = datetime.date(2000, 2, 29)
+    g = Lifegraph(birthday, dpi=100)
+
+    # Birthday itself
+    pos = g._Lifegraph__to_date_position(birthday)
+    assert pos.x == 1
+    assert pos.y == 0
+
+    # relativedelta(years=1) from Feb 29 lands on Feb 28 next year,
+    # so Feb 28, 2001 is the start of year 1
+    pos = g._Lifegraph__to_date_position(datetime.date(2001, 2, 28))
+    assert pos.x == 1
+    assert pos.y == 1
+
+def test_add_life_event_stores_annotation():
+    """add_life_event should append to the annotations list."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
+    assert len(g.annotations) == 0
+
+    g.add_life_event("Graduated", datetime.date(2012, 5, 20), color="#00FF00")
+    assert len(g.annotations) == 1
+
+    # With side
+    g.add_life_event("Moved", datetime.date(2015, 3, 1), color="blue", side=Side.RIGHT)
+    assert len(g.annotations) == 2
+
+def test_resolve_annotation_conflicts(tmp_path):
+    """Overlapping annotations should be separated by the layout engine."""
+    fig, ax = plt.subplots()
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80, ax=ax)
+
+    # Add several events on the same date to force overlaps
+    for i in range(5):
+        g.add_life_event(f"Event {i}", datetime.date(2000, 1, 1), color="red")
+
+    # Drawing triggers conflict resolution
+    g.save(str(tmp_path / "conflicts.png"))
+
+    # All annotations should still be present
+    assert len(ax.texts) >= 5
+
+    plt.close(fig)
+
 if __name__ == "__main__":
     pytest.main()
