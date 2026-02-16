@@ -410,6 +410,19 @@ def test_to_date_position_leap_year_birthday():
     assert pos.x == 1
     assert pos.y == 1
 
+def test_to_date_position_leap_year_accumulation():
+    """Accumulated leap days should not push the year forward incorrectly.
+
+    Born 2000-01-01 (leap year).  On 2003-12-31 the person is still 3
+    (turns 4 on 2004-01-01).  A naive ``delta.days // 365`` gives 4 because
+    ``1460 // 365 == 4``, which is wrong.
+    """
+    birthday = datetime.date(2000, 1, 1)
+    g = Lifegraph(birthday, dpi=100)
+    pos = g._Lifegraph__to_date_position(datetime.date(2003, 12, 31))
+    assert pos.y == 3, f"Expected year 3, got {pos.y}"
+
+
 def test_add_life_event_stores_annotation():
     """add_life_event should append to the annotations list."""
     g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=80)
