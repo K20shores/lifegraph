@@ -34,6 +34,12 @@ Configuration
    :undoc-members:
    :show-inheritance:
 
+Serialization
+-------------
+
+.. automodule:: lifegraph.serialization
+   :members: CONFIG_VERSION, export_config, import_config
+
 Utilities
 ---------
 

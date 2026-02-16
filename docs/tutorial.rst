@@ -287,6 +287,69 @@ Mixing lifegraph with other plots
    fig.savefig("mixed_plots.png", dpi=300)
    plt.close(fig)
 
+Saving and loading configurations
+---------------------------------
+
+You can export a lifegraph to a portable JSON or YAML file and later
+recreate the exact same graph from that file.  This is useful for sharing
+configurations, version-controlling your life data separately from code,
+or building tools on top of the format.
+
+Exporting to JSON
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   g = Lifegraph(birthday, dpi=300, size=Papersize.Letter)
+   g.add_life_event("Graduated", date(2012, 5, 20), color="#00FF00")
+   g.add_era("College", date(2008, 9, 1), date(2012, 5, 15), color="blue")
+   g.add_title("My Life")
+
+   g.save_config("my_life.json")
+
+The format is inferred from the file extension: ``.json`` for JSON,
+``.yaml`` or ``.yml`` for YAML.
+
+Including axis styling
+~~~~~~~~~~~~~~~~~~~~~~
+
+By default, axis label customisations are not included.  Pass
+``include_styling=True`` to export them:
+
+.. code-block:: python
+
+   g.format_x_axis(text="Weeks", color="red", fontsize=14)
+   g.save_config("my_life_styled.json", include_styling=True)
+
+Importing from a config file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   g = Lifegraph.from_config("my_life.json")
+   g.save("my_life.png")
+
+If the file contains a ``styling`` section, it is applied by default.
+Pass ``apply_styling=False`` to ignore it:
+
+.. code-block:: python
+
+   g = Lifegraph.from_config("my_life_styled.json", apply_styling=False)
+
+YAML support
+~~~~~~~~~~~~
+
+YAML requires the optional ``pyyaml`` package:
+
+.. code-block:: bash
+
+   pip install lifegraph[yaml]
+
+.. code-block:: python
+
+   g.save_config("my_life.yaml")
+   g2 = Lifegraph.from_config("my_life.yaml")
+
 Putting it all together
 -----------------------
 
