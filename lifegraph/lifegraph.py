@@ -61,7 +61,7 @@ class Lifegraph:
     >>> plt.close(fig)
     """
 
-    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect = [.25, .1, .5, .8], ax=None):
+    def __init__(self, birthdate, size=Papersize.A3, dpi=300, label_space_epsilon=0.2, max_age=90, axes_rect=None, ax=None):
         if birthdate is None or not isinstance(birthdate, datetime.date):
             raise ValueError("birthdate must be a valid datetime.date object")
 
@@ -71,7 +71,7 @@ class Lifegraph:
 
         self.settings = LifegraphParams(size)
         self.settings.rcParams["figure.dpi"] = dpi
-        self.axes_rect = axes_rect
+        self.axes_rect = axes_rect if axes_rect is not None else [.25, .1, .5, .8]
 
         self.renderer = None
 
