@@ -166,7 +166,7 @@ class Lifegraph:
         >>> g.format_y_axis(text="Your Age", color="green")
         """
         if text is not None:
-            self.xaxis_label = text
+            self.yaxis_label = text
 
         x, y = self.settings.otherParams["ylabel.position"]
         if positionx is not None:
@@ -229,9 +229,7 @@ class Lifegraph:
         >>> g.add_life_event("Graduated", date(2012, 5, 20), color="#00FF00")
         >>> g.add_life_event("Moved abroad", date(2015, 3, 1), side=Side.LEFT)
         """
-        if (date < self.birthdate or date > (relativedelta(years=self.ymax) + self.birthdate)):
-            raise ValueError(
-                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
+        self.__validate_date(date)
 
         position = self.__to_date_position(date)
 
@@ -283,12 +281,8 @@ class Lifegraph:
         >>> g.add_era("College", date(2008, 9, 1), date(2012, 5, 15),
         ...           color="blue", alpha=0.2)
         """
-        if (start_date < self.birthdate or start_date > (relativedelta(years=self.ymax) + self.birthdate)):
-            raise ValueError(
-                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
-        if (end_date < self.birthdate or end_date > (relativedelta(years=self.ymax) + self.birthdate)):
-            raise ValueError(
-                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
+        self.__validate_date(start_date)
+        self.__validate_date(end_date)
 
         start_position = self.__to_date_position(start_date)
         end_position = self.__to_date_position(end_date)
@@ -350,12 +344,8 @@ class Lifegraph:
         >>> g.add_era_span("Road trip", date(2015, 6, 1),
         ...                date(2015, 8, 30), color="#D2691E")
         """
-        if (start_date < self.birthdate or start_date > (relativedelta(years=self.ymax) + self.birthdate)):
-            raise ValueError(
-                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
-        if (end_date < self.birthdate or end_date > (relativedelta(years=self.ymax) + self.birthdate)):
-            raise ValueError(
-                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
+        self.__validate_date(start_date)
+        self.__validate_date(end_date)
 
         if color is None:
             color = random_color()
@@ -773,6 +763,13 @@ class Lifegraph:
 
         return final
 
+    def __validate_date(self, date):
+        """Raise ValueError if *date* is outside ``[birthdate, birthdate + max_age]``."""
+        max_date = self.birthdate + relativedelta(years=self.ymax)
+        if date < self.birthdate or date > max_date:
+            raise ValueError(
+                f"The event date must be a valid datetime.date object that is at least as recent as the birthdate and no larger than {self.ymax}")
+
     def __to_date_position(self, date):
         """Internal, compose a DatePosition from a date
 
@@ -800,7 +797,6 @@ class Lifegraph:
         :param hint: A point or a tuple or 1x2 array
 
         """
-        # TODO: what should this be?
         if hint is not None:
             edge = 10
             if not isinstance(hint, Point):

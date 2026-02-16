@@ -227,5 +227,26 @@ def test_all_papersizes_construct():
         assert "figure.figsize" in params.rcParams
         assert "watermark.fontsize" in params.otherParams
 
+def test_validate_date():
+    """Dates outside [birthdate, birthdate + max_age] should raise ValueError."""
+    birthdate = datetime.date(1990, 1, 1)
+    g = Lifegraph(birthdate, dpi=100, max_age=80)
+
+    # Before birthdate
+    with pytest.raises(ValueError):
+        g.add_life_event("Too early", datetime.date(1989, 12, 31), color="r")
+
+    # After max age
+    with pytest.raises(ValueError):
+        g.add_life_event("Too late", datetime.date(2071, 1, 2), color="r")
+
+    # Boundary: exactly birthdate — should not raise
+    g.add_life_event("Birth", datetime.date(1990, 1, 1), color="r")
+
+    # Boundary: exactly max age date — should not raise
+    g.add_life_event("Max", datetime.date(2070, 1, 1), color="r")
+
+    g.close()
+
 if __name__ == "__main__":
     pytest.main()
