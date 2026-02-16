@@ -134,8 +134,14 @@ class Annotation(Point):
         originates. See `matplotlib annotation guide
         <https://matplotlib.org/tutorials/text/annotations.html>`_.
         Default is ``(0.5, 0.5)``.
+    source_y_range : tuple of (int, int) or None, optional
+        The ``(y_lo, y_hi)`` row range of the source object (event, era,
+        or era span).  Used by
+        :class:`~lifegraph.lifegraph.Lifegraph` to filter annotations
+        outside the visible ``[min_age, max_age)`` window.
+        Default is ``None`` (always visible).
     """
-    def __init__(self, date, text, label_point, color='black', bbox=None, event_point=None, put_circle_around_point=True, marker=None, relpos=(.5, .5)):
+    def __init__(self, date, text, label_point, color='black', bbox=None, event_point=None, put_circle_around_point=True, marker=None, relpos=(.5, .5), source_y_range=None):
         super().__init__(label_point.x, label_point.y)
         self.date = date
         self.text = text
@@ -145,6 +151,7 @@ class Annotation(Point):
         self.put_circle_around_point = put_circle_around_point
         self.marker = marker
         self.relpos = relpos
+        self.source_y_range = source_y_range
     def set_bbox(self, bbox):
         """Set the bounding box of the rendered annotation text.
 

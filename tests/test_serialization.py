@@ -305,3 +305,53 @@ def test_render_after_import(tmp_path):
     assert img_path.exists()
     assert img_path.stat().st_size > 0
     g2.close()
+
+
+# ---------------------------------------------------------------------------
+# min_age serialization
+# ---------------------------------------------------------------------------
+
+def test_min_age_roundtrip(tmp_path):
+    """min_age should survive JSON export/import."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=65, min_age=20)
+    g.add_life_event("Event", datetime.date(2020, 6, 1), color="red")
+
+    path = tmp_path / "min_age.json"
+    g.save_config(str(path))
+
+    raw = json.loads(path.read_text())
+    assert raw["min_age"] == 20
+
+    g2 = Lifegraph.from_config(str(path))
+    assert g2.min_age == 20
+    assert g2.ymax == 65
+
+
+def test_min_age_default_omitted(tmp_path):
+    """min_age=0 should not appear in JSON output."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=90, min_age=0)
+
+    path = tmp_path / "no_min_age.json"
+    g.save_config(str(path))
+
+    raw = json.loads(path.read_text())
+    assert "min_age" not in raw
+
+
+def test_min_age_render_after_import(tmp_path):
+    """Import config with min_age and save PNG."""
+    g = Lifegraph(datetime.date(1990, 1, 1), dpi=100, max_age=65, min_age=20)
+    g.add_life_event("Event", datetime.date(2020, 6, 1), color="red")
+    g.add_era("Work", datetime.date(2015, 1, 1), datetime.date(2025, 1, 1), color="blue")
+    g.add_era_span("Travel", datetime.date(2018, 6, 1), datetime.date(2019, 6, 1), color="#D2691E")
+
+    config_path = tmp_path / "min_age_render.json"
+    g.save_config(str(config_path))
+
+    g2 = Lifegraph.from_config(str(config_path))
+    img_path = tmp_path / "min_age_render.png"
+    g2.save(str(img_path))
+
+    assert img_path.exists()
+    assert img_path.stat().st_size > 0
+    g2.close()

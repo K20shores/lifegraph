@@ -39,17 +39,53 @@ Adding a title and watermark
 :meth:`~lifegraph.Lifegraph.add_watermark` overlays faint diagonal text
 across the whole axes.
 
-Changing the maximum age
-------------------------
+Changing the age range
+----------------------
 
-The grid has 90 rows by default.  You can change this and optionally
-display the number at the bottom of the grid:
+The grid has 90 rows by default.  You can change the maximum age and
+optionally display the number at the bottom of the grid:
 
 .. code-block:: python
 
    g = Lifegraph(birthday, dpi=300, size=Papersize.A4, max_age=100)
    g.show_max_age_label()
    g.save("max_age.png")
+
+Showing a sub-range with ``min_age``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can set a minimum age to display only a portion of the grid.  This
+is useful when you want to focus on a specific period of life -- for
+example, the working years.  Events outside the visible range are stored
+but not drawn, eras that cross the boundary are clipped automatically,
+and era spans entirely outside the range are skipped.  The y-axis labels
+show the actual ages.
+
+.. code-block:: python
+
+   from lifegraph import Lifegraph, Side
+   from lifegraph.configuration import Papersize
+   from datetime import date
+
+   birthday = date(1990, 11, 1)
+   g = Lifegraph(birthday, dpi=300, size=Papersize.A4,
+                  max_age=65, min_age=20)
+
+   g.add_title("The Working Years")
+
+   g.add_life_event("First real job", date(2013, 6, 15), color="#00008B")
+   g.add_life_event("Got promoted", date(2018, 3, 1),
+                     color="#006400", side=Side.LEFT)
+   g.add_life_event("Bought a house", date(2021, 9, 10), color="#8B0000")
+
+   g.add_era("Career at Acme", date(2013, 6, 15), date(2025, 1, 1),
+             color="#4423fe")
+   g.add_era_span("Grad school", date(2012, 9, 1), date(2014, 5, 15),
+                   color="#D2691E")
+
+   g.save("working_years.png")
+
+``min_age`` defaults to ``0``, so existing code is unaffected.
 
 Adding life events
 ------------------

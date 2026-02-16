@@ -69,6 +69,9 @@ def _build_config_dict(graph, include_styling):
     if graph.ymax != 90:
         d["max_age"] = graph.ymax
 
+    if graph.min_age != 0:
+        d["min_age"] = graph.min_age
+
     if graph.settings.size != Papersize.A3:
         d["size"] = graph.settings.size.name
 
@@ -258,9 +261,11 @@ def import_config(cls, path, apply_styling=True):
     dpi = d.get("dpi", 300)
     label_space_epsilon = d.get("label_space_epsilon", 0.2)
     max_age = d.get("max_age", 90)
+    min_age = d.get("min_age", 0)
 
     graph = cls(birthdate, size=size, dpi=dpi,
-                label_space_epsilon=label_space_epsilon, max_age=max_age)
+                label_space_epsilon=label_space_epsilon, max_age=max_age,
+                min_age=min_age)
 
     # Title
     title = d.get("title")
