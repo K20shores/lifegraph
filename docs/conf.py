@@ -73,6 +73,27 @@ sphinx_gallery_conf = {
     "show_signature": False,
 }
 
+
+def _reset_matplotlib_with_tight_bbox(gallery_conf, fname):  # noqa: ARG001
+    """Reset matplotlib but keep savefig.bbox='tight'.
+
+    sphinx-gallery's default reset calls ``plt.rcdefaults()`` which clears
+    all custom rcParams.  Lifegraph annotations often extend beyond the axes,
+    so we need ``bbox_inches='tight'`` on every scraper save to avoid clipping.
+    """
+    import importlib
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    plt.rcdefaults()
+    importlib.reload(mpl.units)
+    importlib.reload(mpl.dates)
+    importlib.reload(mpl.category)
+    mpl.rcParams["savefig.bbox"] = "tight"
+
+
+sphinx_gallery_conf["reset_modules"] = (_reset_matplotlib_with_tight_bbox, "seaborn")
+
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_title = "lifegraph"
