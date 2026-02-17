@@ -83,6 +83,8 @@ docs/sg_execution_times.rst
 examples/**/*.png
 examples/**/*.json
 
+!examples/complete_example/alife.png
+
 # PyBuilder
 target/
 
