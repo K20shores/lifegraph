@@ -2,23 +2,21 @@
 
 ## Version 0.4.0 (February 16, 2026)
 
-Features: 
+Features:
 
-- Bugs by @K20shores in https://github.com/K20shores/lifegraph/pull/36
-- Add JSON/YAML import/export for lifegraph configurations by @K20shores in https://github.com/K20shores/lifegraph/pull/37
-- Range by @K20shores in https://github.com/K20shores/lifegraph/pull/38
-- Fix leap year bug in date-to-grid-position calculation by @K20shores in https://github.com/K20shores/lifegraph/pull/39
-- Replace tutorial with image-forward gallery by @K20shores in https://github.com/K20shores/lifegraph/pull/40
-
+- Fixed y-axis label bug. [#36](https://github.com/K20shores/lifegraph/pull/36)
+- Add JSON/YAML import/export for lifegraph configurations. [#37](https://github.com/K20shores/lifegraph/pull/37)
+- Add range support. [#38](https://github.com/K20shores/lifegraph/pull/38)
+- Fix leap year bug in date-to-grid-position calculation. [#39](https://github.com/K20shores/lifegraph/pull/39)
+- Replace tutorial with image-forward gallery. [#40](https://github.com/K20shores/lifegraph/pull/40)
 
 [Full Changelog](https://github.com/K20shores/lifegraph/compare/v0.3.0...v0.4.0)
 
-
 ## Version 0.3.0 (February 15, 2026)
 
-Features: 
+Features:
 
-- Rework configuration: extract mplstyle, fix axes styling and layout by @K20shores in https://github.com/K20shores/lifegraph/pull/35
+- Rework configuration: extract mplstyle, fix axes styling and layout. [#35](https://github.com/K20shores/lifegraph/pull/35)
 
 [Full Changelog](https://github.com/K20shores/lifegraph/compare/v0.2.0...v0.3.0)
 
