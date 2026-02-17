@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.4.0 (February 16, 2026)
+
+Features: 
+
+- Bugs by @K20shores in https://github.com/K20shores/lifegraph/pull/36
+- Add JSON/YAML import/export for lifegraph configurations by @K20shores in https://github.com/K20shores/lifegraph/pull/37
+- Range by @K20shores in https://github.com/K20shores/lifegraph/pull/38
+- Fix leap year bug in date-to-grid-position calculation by @K20shores in https://github.com/K20shores/lifegraph/pull/39
+- Replace tutorial with image-forward gallery by @K20shores in https://github.com/K20shores/lifegraph/pull/40
+
+
+[Full Changelog](https://github.com/K20shores/lifegraph/compare/v0.3.0...v0.4.0)
+
 
 ## Version 0.3.0 (February 15, 2026)
 
