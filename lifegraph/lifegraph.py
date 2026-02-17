@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
 import datetime
+import io
 import matplotlib.image as mpimg
 import matplotlib.lines as mlines
 from matplotlib.transforms import Bbox
@@ -580,6 +581,16 @@ class Lifegraph:
         self.__draw_xaxis()
         self.__draw_yaxis()
 
+        self.ax.set_aspect('equal', share=True)
+
+        # Dry-run save to establish the tight-bbox layout before measuring
+        # annotation bounding boxes.  Without this, the data-to-display
+        # transform used during measurement differs from the final render
+        # (bbox_inches='tight' crops whitespace, changing the effective
+        # scale), causing the conflict resolver to underestimate label sizes.
+        self.fig.savefig(io.BytesIO(), format='png', bbox_inches='tight')
+        self.renderer = self.fig.canvas.get_renderer()
+
         self.__draw_annotations()
         self.__draw_eras()
         self.__draw_era_spans()
@@ -587,8 +598,6 @@ class Lifegraph:
         self.__draw_title()
         self.__draw_image()
         self.__draw_max_age()
-
-        self.ax.set_aspect('equal', share=True)
 
     def __draw_xaxis(self):
         """Internal, draw the components of the x-axis"""
@@ -825,6 +834,16 @@ class Lifegraph:
         left.sort(key=lambda a: (a.event_point.y, a.event_point.x))
         right.sort(key=lambda a: (a.event_point.y, -a.event_point.x))
 
+        # Compute a dynamic epsilon based on median bbox height so that the
+        # gap scales with figure size, DPI, font size, and y-axis range.
+        import statistics
+        heights = [abs(a.bbox.ymax - a.bbox.ymin) for a in annotations]
+        if heights:
+            dynamic_eps = max(self.label_space_epsilon,
+                              statistics.median(heights) * 0.4)
+        else:
+            dynamic_eps = self.label_space_epsilon
+
         final = []
         for lst in [left, right]:
             _f = []
@@ -832,10 +851,10 @@ class Lifegraph:
                 for checked in _f:
                     if unchecked.overlaps(checked):
                         correction = unchecked.get_xy_correction(
-                            checked, self.label_space_epsilon)
+                            checked, dynamic_eps)
                         unchecked.update_Y_with_correction(correction)
-                    if unchecked.is_within_epsilon_of(checked, self.label_space_epsilon):
-                        correction = [0, self.label_space_epsilon]
+                    if unchecked.is_within_epsilon_of(checked, dynamic_eps):
+                        correction = [0, dynamic_eps]
                         unchecked.update_Y_with_correction(correction)
                 _f.append(unchecked)
             final.extend(_f)
@@ -901,7 +920,7 @@ class Lifegraph:
         """
         # put the text on the plot temporarily so that we can determine the width of the text
         t = self.ax.text(a.x, a.y, a.text, transform=self.ax.transData,
-                         ha='center', va='center', weight='bold')
+                         ha='left', va='center', weight='bold')
 
         if (self.renderer is None):
             self.renderer = self.fig.canvas.get_renderer()

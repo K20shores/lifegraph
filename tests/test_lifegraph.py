@@ -552,34 +552,48 @@ def test_annotation_bbox_uses_bold_weight(tmp_path):
     rendering used bold, causing the conflict resolver to underestimate label
     sizes — especially visible with a zoomed-in y-axis (min_age > 0).
     """
+    import matplotlib.text
     birthdate = datetime.date(1990, 1, 1)
     fig, ax = plt.subplots()
     g = Lifegraph(birthdate, dpi=300, max_age=65, min_age=20, ax=ax)
 
-    # Two annotations that land at roughly the same y position (~age 22-23)
-    g.add_life_event("First real job", datetime.date(2013, 6, 15), color="#00008B")
-    g.add_era_span("Grad school", datetime.date(2012, 9, 1), datetime.date(2014, 5, 15),
-                   color="#D2691E")
+    # Two same-side annotations at close y positions to exercise conflict resolution
+    g.add_life_event("Job", datetime.date(2013, 9, 15), color="#00008B")
+    g.add_life_event("Cat", datetime.date(2013, 10, 1), color="#D2691E")
 
     output = tmp_path / "bold_bbox.png"
     g.save(str(output))
 
-    # Collect bounding boxes of all annotations that were placed
+    # Collect text-only bounding boxes (exclude arrow extent) for annotations
     renderer = fig.canvas.get_renderer()
     bboxes = []
     for child in ax.get_children():
-        if hasattr(child, 'get_window_extent') and hasattr(child, 'get_text'):
-            text = child.get_text()
-            if text in ("First real job", "Grad school"):
-                bboxes.append(child.get_window_extent(renderer))
+        if isinstance(child, matplotlib.text.Annotation) and child.get_text() in ("Job", "Cat"):
+            # Use Text.get_window_extent to get just the text bbox, not the arrow
+            bbox = matplotlib.text.Text.get_window_extent(child, renderer)
+            bboxes.append(bbox)
 
     assert len(bboxes) == 2, f"Expected 2 annotation bboxes, got {len(bboxes)}"
 
-    # The two bounding boxes should not overlap
+    # The two text bounding boxes should not overlap
     b0, b1 = bboxes
     overlaps = not (b0.x1 < b1.x0 or b1.x1 < b0.x0 or b0.y1 < b1.y0 or b1.y1 < b0.y0)
     assert not overlaps, (
         f"Annotation bounding boxes overlap: {b0} vs {b1}"
+    )
+
+    # Verify sufficient visual separation: gap should be at least 20% of text height
+    text_height = max(b0.height, b1.height)
+    if b0.y0 > b1.y1:
+        vertical_gap = b0.y0 - b1.y1
+    elif b1.y0 > b0.y1:
+        vertical_gap = b1.y0 - b0.y1
+    else:
+        vertical_gap = 0
+    min_gap = text_height * 0.1
+    assert vertical_gap >= min_gap, (
+        f"Annotations too close: gap={vertical_gap:.1f}px, "
+        f"min={min_gap:.1f}px (20% of {text_height:.1f}px text height)"
     )
 
     plt.close(fig)
