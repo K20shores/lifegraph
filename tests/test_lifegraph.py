@@ -545,5 +545,45 @@ def test_lifegraph_min_age_render_full(tmp_path):
     g.close()
 
 
+def test_annotation_bbox_uses_bold_weight(tmp_path):
+    """Annotations measured with bold weight should not overlap when min_age is set.
+
+    Regression test: the bbox measurement used regular weight while the final
+    rendering used bold, causing the conflict resolver to underestimate label
+    sizes — especially visible with a zoomed-in y-axis (min_age > 0).
+    """
+    birthdate = datetime.date(1990, 1, 1)
+    fig, ax = plt.subplots()
+    g = Lifegraph(birthdate, dpi=300, max_age=65, min_age=20, ax=ax)
+
+    # Two annotations that land at roughly the same y position (~age 22-23)
+    g.add_life_event("First real job", datetime.date(2013, 6, 15), color="#00008B")
+    g.add_era_span("Grad school", datetime.date(2012, 9, 1), datetime.date(2014, 5, 15),
+                   color="#D2691E")
+
+    output = tmp_path / "bold_bbox.png"
+    g.save(str(output))
+
+    # Collect bounding boxes of all annotations that were placed
+    renderer = fig.canvas.get_renderer()
+    bboxes = []
+    for child in ax.get_children():
+        if hasattr(child, 'get_window_extent') and hasattr(child, 'get_text'):
+            text = child.get_text()
+            if text in ("First real job", "Grad school"):
+                bboxes.append(child.get_window_extent(renderer))
+
+    assert len(bboxes) == 2, f"Expected 2 annotation bboxes, got {len(bboxes)}"
+
+    # The two bounding boxes should not overlap
+    b0, b1 = bboxes
+    overlaps = not (b0.x1 < b1.x0 or b1.x1 < b0.x0 or b0.y1 < b1.y0 or b1.y1 < b0.y0)
+    assert not overlaps, (
+        f"Annotation bounding boxes overlap: {b0} vs {b1}"
+    )
+
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     pytest.main()

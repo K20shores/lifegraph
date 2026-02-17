@@ -901,7 +901,7 @@ class Lifegraph:
         """
         # put the text on the plot temporarily so that we can determine the width of the text
         t = self.ax.text(a.x, a.y, a.text, transform=self.ax.transData,
-                         ha='center', va='center')
+                         ha='center', va='center', weight='bold')
 
         if (self.renderer is None):
             self.renderer = self.fig.canvas.get_renderer()
