@@ -821,7 +821,7 @@ class Lifegraph:
         # for the left, we want to prioritze labels
         # with lower x values to minimize the crossover of annotation lines
         # for the right, we want to prioritize labels that are closer
-        # to the right side of the graph to minimuze the crossover of annotation lines
+        # to the right side of the graph to minimize the crossover of annotation lines
         left.sort(key=lambda a: (a.event_point.y, a.event_point.x))
         right.sort(key=lambda a: (a.event_point.y, -a.event_point.x))
 
