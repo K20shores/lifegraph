@@ -33,7 +33,7 @@ Quick start
    :maxdepth: 2
    :caption: Contents
 
-   tutorial
+   gallery
    api
    changelog
 
