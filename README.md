@@ -74,6 +74,6 @@ g.save("my_life.png")
 For tutorials, API reference, and more examples, see the [full documentation](https://lifegraph.readthedocs.io/en/latest/).
 
 # Contributing and Code of Conduct
-[Read our contributing guidelines](docs/CONTRIBUTING)
+[Read our contributing guidelines](docs/CONTRIBUTING.md)
 
 [Read our code of conduct](docs/CODE_OF_CONDUCT.md)

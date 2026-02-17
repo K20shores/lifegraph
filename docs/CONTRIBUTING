@@ -1,7 +1,0 @@
-# Creating an Issue or Feature Request
-If you find a bug, please file an issue with a description of what happened and a code snippet. 
-Even if you'd like to file a pull request to fix the issue, all PR's should be linked to an issue.
-
-# Creating a Pull Request
-After creating the pull request, it will be reviewed by the community (probably me), and accepted after any comments
-that have been made are addressed.

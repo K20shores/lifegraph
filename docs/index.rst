@@ -36,6 +36,8 @@ Quick start
    auto_examples/index
    api
    changelog
+   CONTRIBUTING
+   CODE_OF_CONDUCT
 
 Indices and tables
 ------------------
