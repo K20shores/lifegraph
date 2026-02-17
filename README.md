@@ -1,5 +1,5 @@
 <!-- Images -->
-[alife]: examples/images/alife.png "A Life Graph"
+[alife]: examples/complete_example/alife.png "A Life Graph"
 
 # Life Graph
 [![License](https://img.shields.io/github/license/k20shores/lifegraph.svg)](https://github.com/k20shores/lifegraph/blob/main/LICENSE)
