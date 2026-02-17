@@ -5,7 +5,7 @@ lifegraph
 the `Wait But Why <https://waitbutwhy.com/2014/05/life-weeks.html>`_ blog
 post.
 
-.. image:: ../examples/images/alife.png
+.. image:: _static/alife.png
    :alt: Example life graph
    :align: center
    :width: 60%
@@ -33,7 +33,7 @@ Quick start
    :maxdepth: 2
    :caption: Contents
 
-   gallery
+   auto_examples/index
    api
    changelog
 

@@ -22,6 +22,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
+    "sphinx_gallery.gen_gallery",
     "myst_parser",
 ]
 
@@ -48,6 +49,28 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "numpy": ("https://numpy.org/doc/stable", None),
+}
+
+# -- Sphinx-Gallery configuration --------------------------------------------
+from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
+
+sphinx_gallery_conf = {
+    "examples_dirs": ["../examples"],
+    "gallery_dirs": ["auto_examples"],
+    "filename_pattern": r"/plot_",
+    "ignore_pattern": r"(all_sizes|__init__)\.py",
+    "subsection_order": ExplicitOrder(
+        [
+            "../examples/getting_started",
+            "../examples/events_and_eras",
+            "../examples/customization",
+            "../examples/advanced",
+            "../examples/complete_example",
+        ]
+    ),
+    "within_subsection_order": FileNameSortKey,
+    "thumbnail_size": (400, 400),
+    "show_signature": False,
 }
 
 # -- Options for HTML output -------------------------------------------------
