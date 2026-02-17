@@ -18,6 +18,6 @@ Examples
 >>> g.save("my_life.png")
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 from .lifegraph import Lifegraph as Lifegraph, Side as Side
