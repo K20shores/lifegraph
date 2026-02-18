@@ -24,6 +24,6 @@ g.add_life_event("Got promoted", date(2018, 3, 1), color="#006400", side=Side.LE
 g.add_life_event("Bought a house", date(2021, 9, 10), color="#8B0000")
 
 g.add_era("Career at Acme", date(2013, 6, 15), date(2025, 1, 1), color="#4423fe")
-g.add_era_span("Grad school", date(2012, 9, 1), date(2014, 5, 15), color="#D2691E", side=Side.LEFT)
+g.add_era_span("Grad school", date(2012, 9, 1), date(2014, 5, 15), color="#D2691E")
 
 g.save("grid_min_age.png")
